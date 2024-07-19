@@ -1,4 +1,3 @@
-
 import 'package:app_dlog/index/widget/tabla_item_diferencia.dart';
 import 'package:flutter/material.dart';
 
@@ -27,12 +26,15 @@ class _Pag1State extends State<Pag1> {
     setState(() {
       _dataFuture = _fetchData();
     });
+    // Mostrar un mensaje de confirmación al usuario.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Datos actualizados')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     
       body: RefreshIndicator(
         onRefresh: _refreshData,
         child: FutureBuilder<void>(
@@ -40,12 +42,14 @@ class _Pag1State extends State<Pag1> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error al cargar los datos'));
             } else {
               return Center(
                 child: SizedBox(
                   width: 700,
                   child: ListView(
-                    
+                    padding: EdgeInsets.all(16.0),
                     children: [
                       SizedBox(height: 50),
                       Center(
@@ -55,9 +59,11 @@ class _Pag1State extends State<Pag1> {
                         ),
                       ),
                       SizedBox(height: 80),
-                      SizedBox(
-                        width: 1000,
+                      AnimatedContainer(
+                        duration: Duration(milliseconds: 300),
+                        width: MediaQuery.of(context).size.width * 0.9,
                         child: Card(
+                          elevation: 2,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),

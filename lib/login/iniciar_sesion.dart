@@ -1,12 +1,6 @@
-
 import 'package:app_dlog/index/navigator_boton_index.dart';
 import 'package:app_dlog/login/Clases_por_consumir/input_decorations.dart';
 import 'package:flutter/material.dart';
-
-
-
-
-
 
 class IniciarSesion extends StatefulWidget {
   const IniciarSesion({super.key});
@@ -19,7 +13,6 @@ class _IniciarSesionState extends State<IniciarSesion> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final TextEditingController _numeroController = TextEditingController();
-
   final TextEditingController _passwordController = TextEditingController();
 
   @override
@@ -34,132 +27,104 @@ class _IniciarSesionState extends State<IniciarSesion> {
           width: double.infinity,
           height: double.infinity,
           child: Stack(
-            children: [cajapurpura(size), iconopersona(), loginform(context)],
+            children: [
+              cajapurpura(size),
+              iconopersona(),
+              loginform(context),
+            ],
           ),
         ),
       ),
     );
   }
 
-  SingleChildScrollView loginform(BuildContext context) {
-    return SingleChildScrollView(
-      child: Row(
-        children: [
-          SizedBox(width: 135,),
-          Column(
-            
-            children: [
-              const SizedBox(
-                height: 250,
-              ),
-              Container(
-                
-                padding: const EdgeInsets.all(20),
-                margin: const EdgeInsets.symmetric(horizontal: 30),
-                width: 500,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 15,
-                          offset: Offset(0, 5))
-                    ]),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 50),
-                    Text('DLOG',
-                        style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-                    Container(
-                      child: Form(
-                        key: _formKey,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        child: Column(
-                          children: [
-                            const SizedBox(
-                              height: 70,
-                            ),
-                            TextFormField(
-                                controller: _numeroController,
-                                autocorrect: false,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecorations.inputDecoration(
-                                    hintText: 'Ingrese su número',
-                                    labelText: 'Número de usuario',
-                                    icono: Icon(Icons.person)),
-                                /*validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Por favor, ingrese su número de usuario';
-                                  }
-                                  if (value.length < 8) {
-                                    return 'El número debe tener al menos 8 dígitos';
-                                  }
-                                  return null;
-                                }*/
-                                ),
-                            const SizedBox(
-                              height: 100,
-                            ),
-                            TextFormField(
-                                controller: _passwordController,
-                                autocorrect: false,
-                                obscureText: true,
-                                decoration: InputDecorations.inputDecoration(
-                                    hintText: '*********',
-                                    labelText: 'Contraseña',
-                                    icono: Icon(Icons.lock_outlined)),
-                                /*validator: (value) {
-                                  return (value != null && value.length >= 4)
-                                      ? null
-                                      : 'La contraseña debe ser mayor o igual a los 4 caracteres';
-                                }*/
-                                ),
-                            SizedBox(height: 200),
-                            MaterialButton(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              disabledColor: Colors.grey,
-                              onPressed: () async {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context)=> const NavigatorBotonIndex()));
-                                
-                                
-                               /* if (_formKey.currentState!.validate()) {
-                                  final token = await iniciarSesion(
-                                      _numeroController.text, _passwordController.text);
-                                  if (token != null) {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context)=> PantallaInicioAmp()));
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                        content: Text('Error al iniciar sesión')));
-                                  }
-                                }*/
-                              },
-                              color: Colors.deepPurple,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 80, vertical: 15),
-                                child: Text(
-                                  'Ingresar',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                          ],
+ 
+
+  Widget loginform(BuildContext context) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        margin: const EdgeInsets.symmetric(horizontal: 30),
+        width: 350,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 15,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 30),
+            const Text(
+              'DLOG',
+              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+            ),
+            Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                children: [
+                  const SizedBox(height: 30),
+                  TextFormField(
+                    controller: _numeroController,
+                    autocorrect: false,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecorations.inputDecoration(
+                      hintText: 'Ingrese su número',
+                      labelText: 'Número de usuario',
+                      icono: const Icon(Icons.person),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  TextFormField(
+                    controller: _passwordController,
+                    autocorrect: false,
+                    obscureText: true,
+                    decoration: InputDecorations.inputDecoration(
+                      hintText: '*********',
+                      labelText: 'Contraseña',
+                      icono: const Icon(Icons.lock_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  MaterialButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    disabledColor: Colors.grey,
+                    onPressed: () async {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NavigatorBotonIndex(),
                         ),
+                      );
+                    },
+                    color: Colors.deepPurple,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 80,
+                        vertical: 15,
+                      ),
+                      child: const Text(
+                        'Ingresar',
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
-                    const SizedBox(
-                      height: 30,
-                    )
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 30),
+          ],
+        ),
       ),
     );
   }
@@ -180,26 +145,35 @@ class _IniciarSesionState extends State<IniciarSesion> {
 
   Container cajapurpura(Size size) {
     return Container(
+      transform: Matrix4.rotationZ(-0.2), // adjust the rotation angle here
       decoration: const BoxDecoration(
-          gradient: LinearGradient(colors: [
-        Color.fromRGBO(24, 128, 197, 1),
-        Color.fromRGBO(90, 70, 178, 1)
-      ])),
+        gradient: LinearGradient(
+          colors: [
+            Color.fromRGBO(24, 128, 197, 1),
+            Color.fromRGBO(90, 70, 178, 1),
+          ],
+        ),
+      ),
       width: double.infinity,
-      height: size.height * 0.4,
-      child: Stack(
-        children: [
-          Positioned(
-            child: burbuja(),
-            top: 90,
-            left: 30,
-          ),
-          Positioned(child: burbuja(), top: 90, left: 30),
-          Positioned(child: burbuja(), top: -40, left: -30),
-          Positioned(child: burbuja(), top: -50, right: -20),
-          Positioned(child: burbuja(), bottom: -50, left: 10),
-          Positioned(child: burbuja(), bottom: 120, right: 20),
-        ],
+      height: size.height * 0.49,
+      child: ClipPath(
+        clipper: CurvedClipper(), // custom clipper class
+        child: Stack(
+          children: [
+            Positioned(
+              child: burbuja(),
+              top: 90,
+              left: 30,
+            ),
+            Positioned(child: burbuja(), top: 90, left: 30),
+            Positioned(child: burbuja(), top: 40, left: -30),
+            Positioned(child: burbuja(), top: -50, right: -20),
+            Positioned(child: burbuja(), bottom: -50, left: 10),
+            Positioned(child: burbuja(), bottom: 120, right: 20),
+            Positioned(child: burbuja(), top: 90, left: 30),
+            
+          ],
+        ),
       ),
     );
   }
@@ -209,10 +183,30 @@ class _IniciarSesionState extends State<IniciarSesion> {
       width: 100,
       height: 100,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(100),
-          color: const Color.fromRGBO(255, 255, 255, 0.05)),
+        borderRadius: BorderRadius.circular(100),
+        color: const Color.fromRGBO(255, 255, 255, 0.05),
+      ),
     );
   }
 }
 
+class CurvedClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+    path.lineTo(0, size.height * 0.2); // start at the top left
+    path.quadraticBezierTo(
+      5,
+      size.height * 0.5,
+      100, // adjust this value to change the curve
+      size.height * 0.5,
+    ); // curve to the left
+    path.lineTo(size.width, size.height * 0.2); // bottom right
+    path.lineTo(size.width, 0); // top right
+    path.close();
+    return path;
+  }
 
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}

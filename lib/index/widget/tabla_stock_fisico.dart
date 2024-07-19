@@ -86,49 +86,42 @@ class TablaStockFisico extends StatelessWidget {
               icon: const Icon(Icons.edit),
               onPressed: () {
                 showDialog(
-                    context: context,
-                    builder: (BuildContext content) {
-                      return AlertDialog(
-                        actions: [
-                          Column(
-                            children: [
-                              const Center(
-                                  child: Text('ALERTA',
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold))),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              const Center(
-                                  child: Text(
-                                      '¿ESTAS SEGURO QUE DESEAS BORRAR?',
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold))),
-                              const SizedBox(
-                                height: 100,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  ElevatedButton(
-                                      onPressed: () {},
-                                      child: const Text('SI')),
-                                  ElevatedButton(
-                                      onPressed: () {},
-                                      child: const Text('NO')),
-                                ],
-                              )
-                            ],
-                          ),
-                        ],
-                        content: const SizedBox(
-                          height: 50,
-                          width: 100,
-                        ),
-                      );
-                    });
+  context: context,
+  builder: (BuildContext context) {
+    return AlertDialog(
+      title: Text('ALERTA'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min, // Evita que el contenido se expanda demasiado
+        children: [
+          Text(
+            '¿ESTAS SEGURO QUE DESEAS BORRAR?',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 20), // Espacio entre el texto y los botones
+        ],
+      ),
+      actions: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Distribuye los botones de manera uniforme
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                // Acción para el botón "SI"
+              },
+              child: Text('SI'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Cierra el diálogo
+              },
+              child: Text('NO'),
+            ),
+          ],
+        ),
+      ],
+    );
+  },
+);
               },
             )),
             DataCell(Container(

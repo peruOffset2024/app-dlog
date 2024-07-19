@@ -1,4 +1,3 @@
-
 import 'package:app_dlog/index/vista_detalle.dart';
 import 'package:flutter/material.dart';
 
@@ -82,23 +81,25 @@ class TablaItemsDiferencia extends StatelessWidget {
               child: GestureDetector(
                 onTap: () {
                   Navigator.push(
-  context,
-  PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) => VistaDetalle(),
-    transitionDuration: const Duration(milliseconds: 500),
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      return SlideTransition(
-        position: Tween<Offset>(
-          begin: Offset(1.0, 0.0),
-          end: Offset.zero,
-        ).animate(animation),
-        child: child,
-      );
-    },
-  ),
-);
-
-
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          VistaDetalle(
+                        barcode: '',
+                      ),
+                      transitionDuration: const Duration(milliseconds: 500),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: Offset(1.0, 0.0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        );
+                      },
+                    ),
+                  );
                 },
                 child: Icon(size: 30, Icons.remove_red_eye_sharp),
               ),
@@ -131,7 +132,33 @@ class TablaItemsDiferencia extends StatelessWidget {
             DataCell(Container(
               padding: EdgeInsets.all(8),
               child: GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          VistaDetalle(
+                        barcode: '',
+                      ),
+                      transitionDuration: const Duration(milliseconds: 500),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: Offset(1.0, 0.0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: Icon(size: 30, Icons.remove_red_eye_sharp),
+              );
+                },
                 child: Icon(size: 30, Icons.remove_red_eye_sharp),
               ),
             )),
