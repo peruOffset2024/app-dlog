@@ -79,30 +79,30 @@ class TablaItemsDiferencia extends StatelessWidget {
             DataCell(Container(
               padding: EdgeInsets.all(8),
               child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          VistaDetalle(
-                        barcode: '',
-                      ),
-                      transitionDuration: const Duration(milliseconds: 500),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: Offset(1.0, 0.0),
-                            end: Offset.zero,
-                          ).animate(animation),
-                          child: child,
-                        );
-                      },
-                    ),
-                  );
-                },
-                child: Icon(size: 30, Icons.remove_red_eye_sharp),
-              ),
+  onTap: () {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            VistaDetalle(barcode: ''),
+        transitionDuration: const Duration(milliseconds: 2500),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset(1.0, 0.0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          );
+        },
+      ),
+    );
+  },
+  child: IconButton(
+    icon: Icon(Icons.arrow_forward),
+    onPressed: null, // No se llama a onPressed cuando se utiliza GestureDetector
+  ),
+)
             )),
           ],
         ),

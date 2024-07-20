@@ -15,75 +15,78 @@ class _IndexPagQrState extends State<IndexPagQr> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 400,
-            ),
-
-            Text('CONSULTAR EN AMP', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            SizedBox(height: 50,),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Container(
-                    width: 400,
-                    child: TextFormField(
-                      autocorrect: false,
-                      autofocus: false,
-                      controller: _codigoSbaController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        enabledBorder: OutlineInputBorder(),
-                        hintText: 'Ingrese Código SBA',
-                        prefixIcon: Icon(Icons.search),
-                      ),
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        shadows: const [
-                          Shadow(
-                            offset: Offset(0, 1),
-                            blurRadius: 2,
-                            color: Color.fromARGB(255, 156, 148, 148),
-                          ),
-                        ],
-                      ),
-                      onFieldSubmitted: (value) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  VistaDetalle(barcode: value)),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 2),
-                  Container(
-                    height: 70,
-                    width: 70,
-                    child: FloatingActionButton(
-                      elevation: 20,
-                      backgroundColor:
-                          const Color.fromARGB(255, 59, 252, 232),
-                      child: const Icon(
-                        Icons.qr_code,
-                        size: 50,
-                      ),
-                      onPressed: _scanearCodigo,
-                    ),
-                  ),
-                ],
+    return Scaffold(
+      body: ListView(
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 400,
               ),
-            ),
-          ],
-        ),
-      ],
+      
+              Text('CONSULTAR EN AMP', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              SizedBox(height: 50,),
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Container(
+                      width: 400,
+                      child: TextFormField(
+                        autocorrect: false,
+                        autofocus: false,
+                        controller: _codigoSbaController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          enabledBorder: OutlineInputBorder(),
+                          hintText: 'Ingrese Código SBA',
+                          prefixIcon: Icon(Icons.search),
+                        ),
+                        style: TextStyle(
+                          color: Colors.grey[800],
+                          shadows: const [
+                            Shadow(
+                              offset: Offset(0, 1),
+                              blurRadius: 2,
+                              color: Color.fromARGB(255, 156, 148, 148),
+                            ),
+                          ],
+                        ),
+                        onFieldSubmitted: (value) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    VistaDetalle(barcode: value)),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    Container(
+                      height: 70,
+                      width: 70,
+                      child: FloatingActionButton(
+                        elevation: 20,
+                        backgroundColor:
+                            const Color.fromARGB(255, 59, 252, 232),
+                        child: const Icon(
+                          Icons.qr_code,
+                          size: 50,
+                        ),
+                        onPressed: _scanearCodigo,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
     );
   }
 

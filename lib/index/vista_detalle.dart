@@ -52,7 +52,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => VistaFiltro(),
-        transitionDuration: const Duration(milliseconds: 500),
+        transitionDuration: const Duration(milliseconds: 2500),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
             position: Tween<Offset>(
@@ -69,6 +69,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(47, 58, 155, 1),
       ),
@@ -136,6 +137,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
             ),
         ],
       ),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
     );
   }
 

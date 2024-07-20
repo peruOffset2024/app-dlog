@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:app_dlog/index/Botones/widget_personalizado.dart';
 import 'package:app_dlog/index/vista_detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,25 +22,6 @@ class _VistaFiltroState extends State<VistaFiltro> {
   String? _selectedFila;
   String? _selectedColumna;
   File? _image;
-
-  double _arriba = 0;
-  double _izquierdo = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final anchoPantalla = MediaQuery.of(context).size.width;
-      final alturaPantalla = MediaQuery.of(context).size.height;
-
-      setState(() {
-        _arriba = anchoPantalla - 80;
-        _izquierdo = alturaPantalla - 1100;
-      });
-    });
-  }
-
-  void _navegarSiguientePag() {}
 
   Future<void> _pickImage() async {
     final pickedFile =
@@ -70,13 +50,11 @@ class _VistaFiltroState extends State<VistaFiltro> {
         jsonData); // Aquí puedes enviar los datos a tu backend o guardarlos donde necesites
     // Por ejemplo, puedes llamar a un método que inserte los datos en la base de datos
   }
-  
+
   final TextEditingController _cantidadController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -246,61 +224,47 @@ class _VistaFiltroState extends State<VistaFiltro> {
                           ),
                         ),
                       ),*/
-                      SizedBox(height: 50,),
-                    Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: SizedBox(
-                        width: 200,
-                        child: TextFormField(
-                            controller: _cantidadController,
-                            autocorrect: false,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.grey),
-                              ),
-                              hintText: 'CANTIDAD'
+                      SizedBox(height: 100,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Card(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          child: SizedBox(
+                            width: 200,
+                            child: TextFormField(
+                              controller: _cantidadController,
+                              autocorrect: false,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
+                                  ),
+                                  hintText: 'CANTIDAD'),
                             ),
-                            
-                            ),
-                      ),
-                    )
+                          ),
+                        ),
+                        //SizedBox(width: 250,),
+                        FloatingActionButton.extended(
+                          onPressed: _handleSubmit,
+                          label: Text('Agregar'),
+                          icon: Icon(Icons.add),
+                        ),          
+                      ],
+                    ),
+                    SizedBox(
+                      height: 50,
+                    ),
                   ],
                 ),
               ),
             ],
           ),
-          if (_arriba != 0 && _izquierdo != 0)
-            Positioned(
-              left: _arriba,
-              bottom: _izquierdo,
-              child: Draggable(
-                feedback: CuerpoBoton(_navegarSiguientePag),
-                child: CuerpoBoton(_navegarSiguientePag),
-                childWhenDragging: Container(),
-                onDragEnd: (details) {
-                  setState(() {
-                    double nuevoArriba = details.offset.dx;
-                    double nuevaDerecha = details.offset.dy;
-
-                    if (nuevoArriba < 0) nuevoArriba = 0;
-                    if (nuevaDerecha < 0) nuevaDerecha = 0;
-                    if (nuevoArriba > MediaQuery.of(context).size.width - 56) {
-                      nuevoArriba = MediaQuery.of(context).size.width - 56;
-                    }
-                    if (nuevaDerecha >
-                        MediaQuery.of(context).size.height - 56) {
-                      nuevaDerecha = MediaQuery.of(context).size.height - 56;
-                    }
-
-                    _arriba = nuevoArriba;
-                    _izquierdo = nuevaDerecha;
-                  });
-                },
-              ),
-            ),
+          
         ],
       ),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
     );
   }
 
