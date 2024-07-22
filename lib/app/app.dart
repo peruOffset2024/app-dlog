@@ -7,12 +7,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: "APP D'LOG",
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 47, 133, 214)),
-        useMaterial3: true,
-      ),
       home: IniciarSesion()
     );
   }

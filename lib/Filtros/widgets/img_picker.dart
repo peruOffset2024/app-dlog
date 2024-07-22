@@ -25,6 +25,7 @@ class _SubirImagenesState extends State<SubirImagenes> {
       if (pickedFile != null) {
         _image = File(pickedFile.path);
       } else {
+        // ignore: avoid_print
         print('No hay imagen');
       }
     });
@@ -44,7 +45,7 @@ class _SubirImagenesState extends State<SubirImagenes> {
                       _image!,
                       fit: BoxFit.cover,
                     )
-                  : Center(
+                  : const Center(
                       child: Icon(
                         Icons.add_photo_alternate_outlined,
                         size: 30,

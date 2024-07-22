@@ -8,8 +8,8 @@ class TablaStockSistema extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DataTable(
-      headingRowColor: MaterialStateColor.resolveWith(
-          (states) => Color.fromARGB(169, 167, 219, 223)),
+      headingRowColor: WidgetStateColor.resolveWith(
+          (states) => const Color.fromARGB(169, 167, 219, 223)),
       columns: const [
         DataColumn(
           label: Text(

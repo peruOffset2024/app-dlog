@@ -8,15 +8,15 @@ class TablaStockFisico extends StatelessWidget {
   const TablaStockFisico({
     required this.stockFisicoList,
     required this.onDelete,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return DataTable(
       columnSpacing: 10.0,
       horizontalMargin: 20.0,
-      headingRowColor: MaterialStateColor.resolveWith(
+      headingRowColor: WidgetStateColor.resolveWith(
         (states) => const Color.fromARGB(169, 167, 219, 223),
       ),
       columns: const [
@@ -101,8 +101,8 @@ class TablaStockFisico extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('ALERTA'),
-          content: Column(
+          title: const Text('ALERTA'),
+          content: const Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
@@ -121,13 +121,13 @@ class TablaStockFisico extends StatelessWidget {
                     onDelete(index);
                     Navigator.pop(context);
                   },
-                  child: Text('SI'),
+                  child: const Text('SI'),
                 ),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text('NO'),
+                  child: const Text('NO'),
                 ),
               ],
             ),

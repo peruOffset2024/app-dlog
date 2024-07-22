@@ -11,8 +11,8 @@ class TablaItemsDiferencia extends StatelessWidget {
     return DataTable(
       columnSpacing: 110.0,
       horizontalMargin: 20.0,
-      headingRowColor: MaterialStateColor.resolveWith(
-        (states) => Color.fromARGB(169, 167, 219, 223),
+      headingRowColor: WidgetStateColor.resolveWith(
+        (states) => const Color.fromARGB(169, 167, 219, 223),
       ),
       columns: const [
         DataColumn(
@@ -56,41 +56,41 @@ class TablaItemsDiferencia extends StatelessWidget {
         DataRow(
           cells: [
             DataCell(Container(
-              padding: EdgeInsets.all(8),
-              child: Text(
+              padding: const EdgeInsets.all(8),
+              child: const Text(
                 '757',
                 style: TextStyle(fontSize: 14),
               ),
             )),
             DataCell(Container(
-              padding: EdgeInsets.all(8),
-              child: Text(
+              padding: const EdgeInsets.all(8),
+              child: const Text(
                 '700',
                 style: TextStyle(fontSize: 14),
               ),
             )),
             DataCell(Container(
-              padding: EdgeInsets.all(8),
-              child: Text(
+              padding: const EdgeInsets.all(8),
+              child: const Text(
                 '650',
                 style: TextStyle(fontSize: 14),
               ),
             )),
             DataCell(Container(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 child: GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            VistaDetalle(barcode: '', codSba: '',),
-                        transitionDuration: const Duration(milliseconds: 900),
+                            const VistaDetalle(barcode: '', codSba: '',),
+                        transitionDuration: const Duration(milliseconds: 500),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
                           return SlideTransition(
                             position: Tween<Offset>(
-                              begin: Offset(1.0, 0.0),
+                              begin: const Offset(1.0, 0.0),
                               end: Offset.zero,
                             ).animate(animation),
                             child: child,
@@ -99,7 +99,7 @@ class TablaItemsDiferencia extends StatelessWidget {
                       ),
                     ).then((_) => Navigator.pop(context));
                   },
-                  child: IconButton(
+                  child: const IconButton(
                     icon: Icon(size: 30, Icons.remove_red_eye_sharp),
                     onPressed:
                         null, // No se llama a onPressed cuando se utiliza GestureDetector
@@ -112,41 +112,41 @@ class TablaItemsDiferencia extends StatelessWidget {
         DataRow(
           cells: [
             DataCell(Container(
-              padding: EdgeInsets.all(8),
-              child: Text(
+              padding: const EdgeInsets.all(8),
+              child: const Text(
                 '758',
                 style: TextStyle(fontSize: 14),
               ),
             )),
             DataCell(Container(
-              padding: EdgeInsets.all(8),
-              child: Text(
+              padding: const EdgeInsets.all(8),
+              child: const Text(
                 '8',
                 style: TextStyle(fontSize: 14),
               ),
             )),
             DataCell(Container(
-              padding: EdgeInsets.all(8),
-              child: Text(
+              padding: const EdgeInsets.all(8),
+              child: const Text(
                 '9',
                 style: TextStyle(fontSize: 14),
               ),
             )),
             DataCell(Container(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
-                            VistaDetalle(barcode: '', codSba: '',),
-                        transitionDuration: const Duration(milliseconds: 900),
+                            const VistaDetalle(barcode: '', codSba: '',),
+                        transitionDuration: const Duration(milliseconds: 500),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
                           return SlideTransition(
                             position: Tween<Offset>(
-                              begin: Offset(1.0, 0.0),
+                              begin: const Offset(1.0, 0.0),
                               end: Offset.zero,
                             ).animate(animation),
                             child: child,
@@ -155,7 +155,7 @@ class TablaItemsDiferencia extends StatelessWidget {
                       ),
                     ).then((_) => Navigator.pop(context));
                   },
-                  child: IconButton(
+                  child: const IconButton(
                     icon: Icon(size: 30, Icons.remove_red_eye_sharp),
                     onPressed:
                         null, // No se llama a onPressed cuando se utiliza GestureDetector

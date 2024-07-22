@@ -3,7 +3,10 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 
 class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _OnboardingScreenState createState() => _OnboardingScreenState();
 }
 
@@ -46,12 +49,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   onPressed: () {
                     _pageController.jumpToPage(2);
                   },
-                  child: Text('SALTAR'),
+                  child: const Text('SALTAR'),
                 ),
                 SmoothPageIndicator(
                   controller: _pageController,
                   count: 3,
-                  effect: WormEffect(
+                  effect: const WormEffect(
                     dotWidth: 10,
                     dotHeight: 10,
                     activeDotColor: Colors.blue,
@@ -63,12 +66,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       Navigator.pushReplacementNamed(context, '/home');
                     } else {
                       _pageController.nextPage(
-                        duration: Duration(milliseconds: 500),
+                        duration: const Duration(milliseconds: 500),
                         curve: Curves.easeInOut,
                       );
                     }
                   },
-                  child: Text('SIGUIENTE'),
+                  child: const Text('SIGUIENTE'),
                 ),
               ],
             ),
@@ -87,16 +90,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         //Image.asset(image, height: 300),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Text(
           title,
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
           description,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 16),
         ),
       ],
     );

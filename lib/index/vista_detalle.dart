@@ -1,6 +1,5 @@
 import 'package:app_dlog/Filtros/filtro_ubicacion.dart';
 import 'package:app_dlog/index/Botones/widget_personalizado.dart';
-import 'package:app_dlog/index/index.dart';
 import 'package:app_dlog/index/navigator_boton_index.dart';
 import 'package:app_dlog/index/widget/stock_fisico.dart';
 import 'package:app_dlog/index/widget/tabla_stock_fisico.dart';
@@ -11,7 +10,7 @@ class VistaDetalle extends StatefulWidget {
   final String barcode;
   final String codSba;
 
-  const VistaDetalle({Key? key, required this.barcode, required this.codSba}) : super(key: key);
+  const VistaDetalle({super.key, required this.barcode, required this.codSba});
 
   @override
   State<VistaDetalle> createState() => _VistaDetalleState();
@@ -23,12 +22,13 @@ class _VistaDetalleState extends State<VistaDetalle> {
   double _izquierdo = 0;
 
   List<StockFisico> stockFisicoList = [
-    StockFisico(zona: 'ZONA A', stand: '7', col: '2', fila: '1', cantidad: '700'),
+    StockFisico(
+        zona: 'ZONA A', stand: '7', col: '2', fila: '1', cantidad: '700'),
     StockFisico(zona: 'ZONA A', stand: '8', col: '2', fila: '1', cantidad: '8'),
   ];
 
   Future<void> _actualizarPantalla() async {
-    await Future.delayed(Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 200));
   }
 
   @override
@@ -52,7 +52,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
       _actPantalla = _actualizarPantalla();
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Datos actualizados')),
+      const SnackBar(content: Text('Datos actualizados')),
     );
   }
 
@@ -60,12 +60,15 @@ class _VistaDetalleState extends State<VistaDetalle> {
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => VistaFiltro(),
-        transitionDuration: const Duration(milliseconds: 900),
+        pageBuilder: (context, animation, secondaryAnimation) => VistaFiltro(
+          barcode: widget.barcode,
+          codSba: widget.codSba,
+        ),
+        transitionDuration: const Duration(milliseconds: 500),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
             position: Tween<Offset>(
-              begin: Offset(1.0, 0.0),
+              begin: const Offset(1.0, 0.0),
               end: Offset.zero,
             ).animate(animation),
             child: child,
@@ -85,28 +88,29 @@ class _VistaDetalleState extends State<VistaDetalle> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromRGBO(47, 58, 155, 1), //Pag1
+        backgroundColor: const Color.fromARGB(255, 33, 150, 243), //Pag1
         leading: GestureDetector(
           onTap: () {
             Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => NavigatorBotonIndex(),
-        transitionDuration: const Duration(milliseconds: 900),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: Offset(1.0, 0.0),
-              end: Offset.zero,
-            ).animate(animation),
-            child: child,
-          );
-        },
-      ),
-    ).then((_) => Navigator.pop(context));
-    
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const NavigatorBotonIndex(),
+                transitionDuration: const Duration(milliseconds: 500),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      end: Offset.zero,
+                      begin: const Offset(-1.0, 0.0),
+                    ).animate(animation),
+                    child: child,
+                  );
+                },
+              ),
+            ).then((_) => Navigator.pop(context));
           },
-          child: Icon(Icons.arrow_back),
+          child: const Icon(Icons.arrow_back),
         ),
       ),
       body: Stack(
@@ -121,13 +125,13 @@ class _VistaDetalleState extends State<VistaDetalle> {
                     child: CircularProgressIndicator(),
                   );
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('Error al cargar los datos'));
+                  return const Center(child: Text('Error al cargar los datos'));
                 } else {
                   return Center(
                     child: SizedBox(
                       width: 700,
                       child: ListView(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         children: [
                           _buildDetalleItem(),
                           const SizedBox(height: 30),
@@ -149,7 +153,6 @@ class _VistaDetalleState extends State<VistaDetalle> {
               bottom: _izquierdo,
               child: Draggable(
                 feedback: CuerpoBoton(_navegarSiguientePag),
-                child: CuerpoBoton(_navegarSiguientePag),
                 childWhenDragging: Container(),
                 onDragEnd: (details) {
                   setState(() {
@@ -161,7 +164,8 @@ class _VistaDetalleState extends State<VistaDetalle> {
                     if (nuevoArriba > MediaQuery.of(context).size.width - 56) {
                       nuevoArriba = MediaQuery.of(context).size.width - 56;
                     }
-                    if (nuevaDerecha > MediaQuery.of(context).size.height - 56) {
+                    if (nuevaDerecha >
+                        MediaQuery.of(context).size.height - 56) {
                       nuevaDerecha = MediaQuery.of(context).size.height - 56;
                     }
 
@@ -169,6 +173,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
                     _izquierdo = nuevaDerecha;
                   });
                 },
+                child: CuerpoBoton(_navegarSiguientePag),
               ),
             ),
         ],
@@ -182,18 +187,18 @@ class _VistaDetalleState extends State<VistaDetalle> {
       width: 700,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-      child: const Column(
+      child: Column(
         children: [
           Text(
-            'DETALLE ITEM: 757',
-            style: TextStyle(
+            'DETALLE ITEM: ${widget.codSba.isNotEmpty ? widget.barcode : widget.barcode}',
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
           ),
-          SizedBox(height: 20),
-          Text(
+          const SizedBox(height: 20),
+          const Text(
             'COUCHE BRILLO ',
             style: TextStyle(
               fontSize: 18,
@@ -201,7 +206,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
               color: Colors.black,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -219,7 +224,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
             ),
           ],
         ),
-        Container(
+        SizedBox(
           width: 700,
           child: Card(
             shape: RoundedRectangleBorder(
@@ -227,7 +232,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: TablaStockSistema(),
+              child: const TablaStockSistema(),
             ),
           ),
         ),
@@ -248,7 +253,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
             ),
           ],
         ),
-        Container(
+        SizedBox(
           width: 700,
           child: Card(
             shape: RoundedRectangleBorder(
@@ -308,7 +313,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
       child: Center(
         child: Text(
           text,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),

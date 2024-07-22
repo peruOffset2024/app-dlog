@@ -161,16 +161,16 @@ class _IniciarSesionState extends State<IniciarSesion> {
         child: Stack(
           children: [
             Positioned(
-              child: burbuja(),
               top: 90,
               left: 30,
+              child: burbuja(),
             ),
-            Positioned(child: burbuja(), top: 90, left: 30),
-            Positioned(child: burbuja(), top: 40, left: -30),
-            Positioned(child: burbuja(), top: -50, right: -20),
-            Positioned(child: burbuja(), bottom: -50, left: 10),
-            Positioned(child: burbuja(), bottom: 120, right: 20),
-            Positioned(child: burbuja(), top: 90, left: 30),
+            Positioned(top: 90, left: 30, child: burbuja()),
+            Positioned(top: 40, left: -30, child: burbuja()),
+            Positioned(top: -50, right: -20, child: burbuja()),
+            Positioned(bottom: -50, left: 10, child: burbuja()),
+            Positioned(bottom: 120, right: 20, child: burbuja()),
+            Positioned(top: 90, left: 30, child: burbuja()),
             
           ],
         ),

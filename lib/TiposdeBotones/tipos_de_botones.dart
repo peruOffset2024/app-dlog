@@ -10,29 +10,29 @@ class TiposDeBotones extends StatelessWidget {
         child: Column(
           children: [
             ElevatedButton(
-  child: Text('Elevated Button'),
+  child: const Text('Elevated Button'),
   onPressed: () {
     // Acción al presionar el botón
   },
 ),
 TextButton(
-  child: Text('Text Button'),
+  child: const Text('Text Button'),
   onPressed: () {
     // Acción al presionar el botón
   },
 ),
 OutlinedButton(
-  child: Text('Outlined Button'),
+  child: const Text('Outlined Button'),
   onPressed: () {
     // Acción al presionar el botón
   },
 ),IconButton(
-  icon: Icon(Icons.add),
+  icon: const Icon(Icons.add),
   onPressed: () {
     // Acción al presionar el botón
   },
 ),FloatingActionButton(
-  child: Icon(Icons.add),
+  child: const Icon(Icons.add),
   onPressed: () {
     // Acción al presionar el botón
   },
@@ -42,27 +42,27 @@ PopupMenuButton(
     // Acción al seleccionar una opción
   },
   itemBuilder: (context) => [
-    PopupMenuItem(
-      child: Text('Opción 1'),
+    const PopupMenuItem(
       value: 'opcion1',
+      child: Text('Opción 1'),
     ),
-    PopupMenuItem(
-      child: Text('Opción 2'),
+    const PopupMenuItem(
       value: 'opcion2',
+      child: Text('Opción 2'),
     ),
     
   ],
   
 ),
 ToggleButtons(
-  children: [
-    Icon(Icons.add),
-    Icon(Icons.remove),
-  ],
   onPressed: (index) {
     // Acción al presionar un botón
   },
-  isSelected: [false, true],
+  isSelected: const [false, true],
+  children: const [
+    Icon(Icons.add),
+    Icon(Icons.remove),
+  ],
 )
           ],
         ),

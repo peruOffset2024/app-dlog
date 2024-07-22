@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// ignore: non_constant_identifier_names
 Widget CuerpoBoton(Function() onTap) {
   return Material(
     type: MaterialType.transparency,
@@ -8,7 +9,7 @@ Widget CuerpoBoton(Function() onTap) {
       child: Container(
         width: 70,
         height: 70,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: Color.fromARGB(255, 148, 206, 184),
           boxShadow: [
@@ -19,7 +20,7 @@ Widget CuerpoBoton(Function() onTap) {
             ),
           ],
         ),
-        child: Icon(size: 50, Icons.add),
+        child: const Icon(size: 50, Icons.add),
       ),
     ),
   );

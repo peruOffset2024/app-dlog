@@ -10,6 +10,7 @@ class VistaFiltro extends StatefulWidget {
 class _VistaFiltroState extends State<VistaFiltro> {
   String _dropdownValue = '1';
 
+  // ignore: prefer_final_fields
   var _items = [
     '1',
     '2',
@@ -26,7 +27,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
       appBar: AppBar(),
       body: Column(
         children: [
-          Text('PAGINA DE FILTROS', style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),),
+          const Text('PAGINA DE FILTROS', style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),),
         Container(
           width: 800,
           height: 800,
@@ -49,7 +50,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
               borderRadius: BorderRadius.circular(10),
               icon: const Icon(Icons.keyboard_arrow_down),
               iconSize: 50,
-              style: TextStyle(color: Colors.black),
+              style: const TextStyle(color: Colors.black),
               underline: Container(),
               ),
               

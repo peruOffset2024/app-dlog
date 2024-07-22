@@ -22,18 +22,21 @@ class _IndexPagQrState extends State<IndexPagQr> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 350,
                 ),
-                  
-                Text('CONSULTAR EN AMP', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                SizedBox(height: 50,),
+                const Text('CONSULTAR EN AMP',
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(
+                  height: 50,
+                ),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Container(
+                      SizedBox(
                         width: 400,
                         child: TextFormField(
                           autocorrect: false,
@@ -57,37 +60,44 @@ class _IndexPagQrState extends State<IndexPagQr> {
                           ),
                           onFieldSubmitted: (value) {
                             Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) => VistaDetalle(barcode: _codigoSbaController.text, codSba: '',),
-                    transitionDuration: const Duration(milliseconds: 900),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: Offset(1.0, 0.0),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            );
-                    },
-                  ),
-                ).then((_) => Navigator.pop(context));
+                              context,
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        VistaDetalle(
+                                  barcode: _codigoSbaController.text,
+                                  codSba: _codigoSbaController.text,
+                                ),
+                                transitionDuration:
+                                    const Duration(milliseconds: 500),
+                                transitionsBuilder: (context, animation,
+                                    secondaryAnimation, child) {
+                                  return SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(1.0, 0.0),
+                                      end: Offset.zero,
+                                    ).animate(animation),
+                                    child: child,
+                                  );
+                                },
+                              ),
+                            ).then((_) => Navigator.pop(context));
                           },
                         ),
                       ),
                       const SizedBox(width: 2),
-                      Container(
+                      SizedBox(
                         height: 70,
                         width: 70,
                         child: FloatingActionButton(
                           elevation: 20,
                           backgroundColor:
                               const Color.fromARGB(255, 59, 252, 232),
+                          onPressed: _scanearCodigo,
                           child: const Icon(
                             Icons.qr_code,
                             size: 50,
                           ),
-                          onPressed: _scanearCodigo,
                         ),
                       ),
                     ],
@@ -116,31 +126,32 @@ class _IndexPagQrState extends State<IndexPagQr> {
     }
 
     if (!mounted) return;
-    if (barcodeScanRes != "-1"){
+    if (barcodeScanRes != "-1") {
       Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            VistaDetalle(barcode: '', codSba: '',),
-        transitionDuration: const Duration(milliseconds: 2500),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: Offset(1.0, 0.0),
-              end: Offset.zero,
-            ).animate(animation),
-            child: child,
-          );
-        },
-      ),
-    );
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => VistaDetalle(
+            barcode: barcodeScanRes,
+            codSba: _codigoSbaController.text,
+          ),
+          transitionDuration: const Duration(milliseconds: 500),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1.0, 0.0),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            );
+          },
+        ),
+      );
     } else {
       // si se cancela, no hacer nada o mostrar un mensaje
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Escaneo Cancelado")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Escaneo Cancelado")));
     }
 
     // Navegar a la pantalla donde se mostrará el valor obtenido
-    
-  } 
-
+  }
 }

@@ -6,9 +6,9 @@ class InputDecorations {
       required String labelText,
       required Icon icono}) {
     return InputDecoration(
-        border: OutlineInputBorder(
+        border: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.grey),
-        ), focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+        ), focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
         
         hintText: hintText,
         labelText: labelText,
