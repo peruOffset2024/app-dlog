@@ -1,13 +1,17 @@
 import 'package:app_dlog/Filtros/filtro_ubicacion.dart';
 import 'package:app_dlog/index/Botones/widget_personalizado.dart';
+import 'package:app_dlog/index/index.dart';
+import 'package:app_dlog/index/navigator_boton_index.dart';
+import 'package:app_dlog/index/widget/stock_fisico.dart';
 import 'package:app_dlog/index/widget/tabla_stock_fisico.dart';
 import 'package:app_dlog/index/widget/tabla_stock_sistema.dart';
 import 'package:flutter/material.dart';
 
 class VistaDetalle extends StatefulWidget {
   final String barcode;
+  final String codSba;
 
-  const VistaDetalle({Key? key, required this.barcode}) : super(key: key);
+  const VistaDetalle({Key? key, required this.barcode, required this.codSba}) : super(key: key);
 
   @override
   State<VistaDetalle> createState() => _VistaDetalleState();
@@ -17,6 +21,11 @@ class _VistaDetalleState extends State<VistaDetalle> {
   late Future<void> _actPantalla;
   double _arriba = 0;
   double _izquierdo = 0;
+
+  List<StockFisico> stockFisicoList = [
+    StockFisico(zona: 'ZONA A', stand: '7', col: '2', fila: '1', cantidad: '700'),
+    StockFisico(zona: 'ZONA A', stand: '8', col: '2', fila: '1', cantidad: '8'),
+  ];
 
   Future<void> _actualizarPantalla() async {
     await Future.delayed(Duration(milliseconds: 200));
@@ -52,7 +61,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => VistaFiltro(),
-        transitionDuration: const Duration(milliseconds: 2500),
+        transitionDuration: const Duration(milliseconds: 900),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
             position: Tween<Offset>(
@@ -66,12 +75,39 @@ class _VistaDetalleState extends State<VistaDetalle> {
     ).then((_) => Navigator.pop(context));
   }
 
+  void _eliminarStockFisico(int index) {
+    setState(() {
+      stockFisicoList.removeAt(index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-        backgroundColor: Color.fromRGBO(47, 58, 155, 1),
+        backgroundColor: Color.fromRGBO(47, 58, 155, 1), //Pag1
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => NavigatorBotonIndex(),
+        transitionDuration: const Duration(milliseconds: 900),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset(1.0, 0.0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          );
+        },
+      ),
+    ).then((_) => Navigator.pop(context));
+    
+          },
+          child: Icon(Icons.arrow_back),
+        ),
       ),
       body: Stack(
         children: [
@@ -220,7 +256,10 @@ class _VistaDetalleState extends State<VistaDetalle> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: TablaStockFisico(),
+              child: TablaStockFisico(
+                stockFisicoList: stockFisicoList,
+                onDelete: _eliminarStockFisico,
+              ),
             ),
           ),
         ),

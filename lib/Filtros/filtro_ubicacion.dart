@@ -64,7 +64,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
                     VistaDetalle(
-                  barcode: '',
+                  barcode: '', codSba: '',
                 ),
                 transitionDuration: const Duration(milliseconds: 500),
                 transitionsBuilder:

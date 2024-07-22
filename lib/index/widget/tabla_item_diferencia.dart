@@ -77,33 +77,36 @@ class TablaItemsDiferencia extends StatelessWidget {
               ),
             )),
             DataCell(Container(
-              padding: EdgeInsets.all(8),
-              child: GestureDetector(
-  onTap: () {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            VistaDetalle(barcode: ''),
-        transitionDuration: const Duration(milliseconds: 2500),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: Offset(1.0, 0.0),
-              end: Offset.zero,
-            ).animate(animation),
-            child: child,
-          );
-        },
-      ),
-    );
-  },
-  child: IconButton(
-    icon: Icon(Icons.arrow_forward),
-    onPressed: null, // No se llama a onPressed cuando se utiliza GestureDetector
-  ),
-)
-            )),
+                padding: EdgeInsets.all(8),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            VistaDetalle(barcode: '', codSba: '',),
+                        transitionDuration: const Duration(milliseconds: 900),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return SlideTransition(
+                            position: Tween<Offset>(
+                              begin: Offset(1.0, 0.0),
+                              end: Offset.zero,
+                            ).animate(animation),
+                            child: child,
+                          );
+                        },
+                      ),
+                    ).then((_) => Navigator.pop(context));
+                  },
+                  child: IconButton(
+                    icon: Icon(size: 30, Icons.remove_red_eye_sharp),
+                    onPressed:
+                        null, // No se llama a onPressed cuando se utiliza GestureDetector
+                  ),
+                )
+              )
+            ),
           ],
         ),
         DataRow(
@@ -132,35 +135,32 @@ class TablaItemsDiferencia extends StatelessWidget {
             DataCell(Container(
               padding: EdgeInsets.all(8),
               child: GestureDetector(
-                onTap: () {
-                  GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          VistaDetalle(
-                        barcode: '',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            VistaDetalle(barcode: '', codSba: '',),
+                        transitionDuration: const Duration(milliseconds: 900),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return SlideTransition(
+                            position: Tween<Offset>(
+                              begin: Offset(1.0, 0.0),
+                              end: Offset.zero,
+                            ).animate(animation),
+                            child: child,
+                          );
+                        },
                       ),
-                      transitionDuration: const Duration(milliseconds: 500),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: Offset(1.0, 0.0),
-                            end: Offset.zero,
-                          ).animate(animation),
-                          child: child,
-                        );
-                      },
-                    ),
-                  );
-                },
-                child: Icon(size: 30, Icons.remove_red_eye_sharp),
-              );
-                },
-                child: Icon(size: 30, Icons.remove_red_eye_sharp),
-              ),
+                    ).then((_) => Navigator.pop(context));
+                  },
+                  child: IconButton(
+                    icon: Icon(size: 30, Icons.remove_red_eye_sharp),
+                    onPressed:
+                        null, // No se llama a onPressed cuando se utiliza GestureDetector
+                  ),
+                )
             )),
           ],
         ),
