@@ -21,7 +21,7 @@ class _NavigatorBotonIndexState extends State<NavigatorBotonIndex> {
   ];
 
   Future<void> _mostrarAlertaSalir() async {
-  bool salir = await showDialog(
+  bool? salir = await showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
@@ -45,7 +45,7 @@ class _NavigatorBotonIndexState extends State<NavigatorBotonIndex> {
     },
   );
 
-  if (salir) {
+  if (salir == true) {
     Navigator.pushAndRemoveUntil(
       // ignore: use_build_context_synchronously
       context,
@@ -109,3 +109,4 @@ class _NavigatorBotonIndexState extends State<NavigatorBotonIndex> {
     );
   }
 }
+ 

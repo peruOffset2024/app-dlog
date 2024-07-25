@@ -97,7 +97,7 @@ class TablaItemsDiferencia extends StatelessWidget {
                           );
                         },
                       ),
-                    ).then((_) => Navigator.pop(context));
+                    ); //.then((_) => Navigator.pop(context));
                   },
                   child: const IconButton(
                     icon: Icon(size: 30, Icons.remove_red_eye_sharp),

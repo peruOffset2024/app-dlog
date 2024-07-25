@@ -75,7 +75,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
           );
         },
       ),
-    ).then((_) => Navigator.pop(context));
+    );//.then((_) => Navigator.pop(context));
   }
 
   void _eliminarStockFisico(int index) {
@@ -91,7 +91,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
         backgroundColor: const Color.fromARGB(255, 33, 150, 243), //Pag1
         leading: GestureDetector(
           onTap: () {
-            Navigator.push(
+            Navigator.pop(
               context,
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
@@ -108,7 +108,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
                   );
                 },
               ),
-            ).then((_) => Navigator.pop(context));
+            );//.then((_) => Navigator.pop(context));
           },
           child: const Icon(Icons.arrow_back),
         ),

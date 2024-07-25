@@ -2,6 +2,9 @@ import 'package:app_dlog/index/vista_detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:vibration/vibration.dart';
+
+
 
 class IndexPagQr extends StatefulWidget {
   const IndexPagQr({super.key});
@@ -81,7 +84,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
                                   );
                                 },
                               ),
-                            ).then((_) => Navigator.pop(context));
+                            ); //.then((_) => Navigator.pop(context));
                           },
                         ),
                       ),
@@ -115,24 +118,37 @@ class _IndexPagQrState extends State<IndexPagQr> {
   Future<void> _scanearCodigo() async {
     String barcodeScanRes;
     try {
+      // ignore: avoid_print
+      print('Iniciando escaneo...'); // Depuración
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
         '#ff6666', // color del scanner
         'Cancelar', // texto del botón cancelar
         true, // mostrar flash
         ScanMode.QR, // modo de escaneo QR
       );
+      // ignore: avoid_print
+      print('Resultado del escaneo: $barcodeScanRes'); // Depuración
     } on PlatformException {
       barcodeScanRes = 'Failed to get platform version.';
     }
 
     if (!mounted) return;
+
     if (barcodeScanRes != "-1") {
+      // ignore: avoid_print
+      print('Código escaneado: $barcodeScanRes'); // Depuración
+      bool? hasVibrator = await Vibration.hasVibrator();
+      if (hasVibrator == true) {
+        Vibration.vibrate();
+      }
+      
       Navigator.push(
+        // ignore: use_build_context_synchronously
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) => VistaDetalle(
             barcode: barcodeScanRes,
-            codSba: _codigoSbaController.text,
+            codSba: barcodeScanRes, // Usar el resultado del escaneo como codSba
           ),
           transitionDuration: const Duration(milliseconds: 500),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -151,7 +167,5 @@ class _IndexPagQrState extends State<IndexPagQr> {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("Escaneo Cancelado")));
     }
-
-    // Navegar a la pantalla donde se mostrará el valor obtenido
   }
 }

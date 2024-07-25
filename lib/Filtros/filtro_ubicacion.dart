@@ -85,6 +85,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
     return jsonEncode(selectedValues);
   }
 
+  // ignore: unused_element
   void _handleSubmit() {
     String jsonData = getSelectedValuesAsJson();
     // ignore: avoid_print
@@ -95,13 +96,19 @@ class _VistaFiltroState extends State<VistaFiltro> {
 
   final TextEditingController _cantidadController = TextEditingController();
 
+  void _removeImage(File image) {
+    setState(() {
+      _images.remove(image);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            Navigator.push(
+            Navigator.pop(
               context,
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
@@ -121,7 +128,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                   );
                 },
               ),
-            ).then((_) => Navigator.pop(context));
+            ); //.then((_) => Navigator.pop(context));
           },
           icon: const Icon(Icons.arrow_back),
         ),
@@ -220,59 +227,91 @@ class _VistaFiltroState extends State<VistaFiltro> {
                             spacing: 10,
                             runSpacing: 10,
                             children: _images.map((image) {
-                              return ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.file(
-                                  image,
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                ),
+                              return Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.file(
+                                      image,
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: 0,
+                                    child: GestureDetector(
+                                      onTap: () => _removeImage(image),
+                                      child: Container(
+                                        decoration: const BoxDecoration(
+                                          color: Colors.transparent,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               );
                             }).toList(),
                           )
                         : const Text('No hay imágenes seleccionadas.'),
-                    const SizedBox(height: 200),
-                    const SizedBox(
-                      height: 50,
+                    const SizedBox(height: 100),
+                    Row(
+                      children: [
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        Card(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          child: SizedBox(
+                            width: 200,
+                            child: TextFormField(
+                              controller: _cantidadController,
+                              autocorrect: false,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey),
+                                  ),
+                                  hintText: 'CANTIDAD'),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+
                   ],
                 ),
+                
               ),
+        
+              
+              
             ],
           ),
         ],
       ),
-      floatingActionButton: Row(
-        children: [
-        const SizedBox(width: 20,),
-          Card(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: SizedBox(
-              width: 200,
-              child: TextFormField(
-                controller: _cantidadController,
-                autocorrect: false,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
-                    ),
-                    hintText: 'CANTIDAD'),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: MaterialButton(
+                
+                onPressed: () {},
+                color: const Color.fromARGB(255, 50, 54, 44),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 340,
+                    vertical: 20,
+                  ),
+                  child: const Text(
+                    'Agregar',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 452,),
-          FloatingActionButton.extended(
-            backgroundColor: const Color.fromARGB(255, 120, 193, 241),
-            
-            onPressed: _handleSubmit,
-            label: const Text('Agregar', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),),
-            icon: const Icon(Icons.add),
-          ),
-        ],
-      ),
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
     );
   }
