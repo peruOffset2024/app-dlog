@@ -1,13 +1,16 @@
+import 'dart:convert';
+import 'package:app_dlog/index/nueva_vista_detalle.dart';
 import 'package:app_dlog/index/vista_detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:vibration/vibration.dart';
-
-
+import 'package:http/http.dart' as http;
 
 class IndexPagQr extends StatefulWidget {
   const IndexPagQr({super.key});
+
+  
 
   @override
   State<IndexPagQr> createState() => _IndexPagQrState();
@@ -16,8 +19,11 @@ class IndexPagQr extends StatefulWidget {
 class _IndexPagQrState extends State<IndexPagQr> {
   final TextEditingController _codigoSbaController = TextEditingController();
 
+  List<dynamic> jsonData = [];
+  List<dynamic> jsonDataUbi = [];
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       body: ListView(
         children: [
@@ -62,29 +68,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
                             ],
                           ),
                           onFieldSubmitted: (value) {
-                            Navigator.push(
-                              context,
-                              PageRouteBuilder(
-                                pageBuilder:
-                                    (context, animation, secondaryAnimation) =>
-                                        VistaDetalle(
-                                  barcode: _codigoSbaController.text,
-                                  codSba: _codigoSbaController.text,
-                                ),
-                                transitionDuration:
-                                    const Duration(milliseconds: 500),
-                                transitionsBuilder: (context, animation,
-                                    secondaryAnimation, child) {
-                                  return SlideTransition(
-                                    position: Tween<Offset>(
-                                      begin: const Offset(1.0, 0.0),
-                                      end: Offset.zero,
-                                    ).animate(animation),
-                                    child: child,
-                                  );
-                                },
-                              ),
-                            ); //.then((_) => Navigator.pop(context));
+                            _obtenerDatosApi();
                           },
                         ),
                       ),
@@ -115,6 +99,72 @@ class _IndexPagQrState extends State<IndexPagQr> {
     );
   }
 
+  Future<void> _obtenerDatosApi() async {
+    try {
+      final codigoSba = _codigoSbaController.text;
+      if (codigoSba.isNotEmpty) {
+        final url =
+            'http://190.107.181.163:81/amq/flutter_ajax.php?search=$codigoSba';
+        final response = await http.get(Uri.parse(url));
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          setState(() {
+            jsonData = data is List<dynamic> ? data : [];
+          });
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  NuevaVistaDetalle(jsonData: jsonData, jsonDataUbi: jsonDataUbi, codigoSba: _codigoSbaController, barcode: '',),
+              transitionDuration: const Duration(milliseconds: 500),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(1.0, 0.0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                );
+              },
+            ),
+          );
+        } else{
+          setState(() {
+            jsonData = [];
+          });
+          print('Error al consumir el API');
+        }
+      }else{
+        print('Ingrese un codigo SBA valido');
+      }
+
+      // codigo para consumir el api de la url de Ubicaciones
+
+      final UrlUbicaciones = 'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$codigoSba';
+      final responseUbicaciones = await http.get(Uri.parse(UrlUbicaciones));
+      if(responseUbicaciones.statusCode == 200){
+        final dataUbi = jsonDecode(responseUbicaciones.body);
+        setState(() {
+          jsonDataUbi = dataUbi is List<dynamic> ? dataUbi : [];
+        });
+      } else {
+        setState(() {
+          jsonDataUbi = [];
+        });
+        print('Error al obtener datos de la ubicacion');
+      }
+    } catch (e) {
+      setState(() {
+        jsonDataUbi = [];
+        jsonDataUbi = [];
+      });
+      print('Error: $e');
+    }
+  }
+
+
+
   Future<void> _scanearCodigo() async {
     String barcodeScanRes;
     try {
@@ -141,7 +191,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
       if (hasVibrator == true) {
         Vibration.vibrate();
       }
-      
+
       Navigator.push(
         // ignore: use_build_context_synchronously
         context,

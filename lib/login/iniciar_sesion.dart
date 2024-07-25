@@ -30,7 +30,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
             children: [
               cajapurpura(size),
               iconopersona(),
-              loginform(context),
+              loginform(context, size),
             ],
           ),
         ),
@@ -38,14 +38,12 @@ class _IniciarSesionState extends State<IniciarSesion> {
     );
   }
 
- 
-
-  Widget loginform(BuildContext context) {
+  Widget loginform(BuildContext context, Size size) {
     return Center(
       child: Container(
-        padding: const EdgeInsets.all(20),
-        margin: const EdgeInsets.symmetric(horizontal: 30),
-        width: 350,
+        padding: EdgeInsets.all(size.width * 0.05), // const EdgeInsets.all(20),
+        margin: EdgeInsets.symmetric(horizontal: size.width * 0.08), // const EdgeInsets.symmetric(horizontal: 30),
+        width: size.width * 0.9, // margin: width: 350,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(25),
@@ -108,9 +106,9 @@ class _IniciarSesionState extends State<IniciarSesion> {
                     },
                     color: Colors.deepPurple,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 80,
-                        vertical: 15,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: size.width * 0.2,
+                        vertical: size.height * 0.02,
                       ),
                       child: const Text(
                         'Ingresar',
@@ -161,29 +159,52 @@ class _IniciarSesionState extends State<IniciarSesion> {
         child: Stack(
           children: [
             Positioned(
-              top: 90,
-              left: 30,
-              child: burbuja(),
+              top: size.height * 0.12,
+              left: size.width * 0.08,
+              child: burbuja(size),
             ),
-            Positioned(top: 90, left: 30, child: burbuja()),
-            Positioned(top: 40, left: -30, child: burbuja()),
-            Positioned(top: -50, right: -20, child: burbuja()),
-            Positioned(bottom: -50, left: 10, child: burbuja()),
-            Positioned(bottom: 120, right: 20, child: burbuja()),
-            Positioned(top: 90, left: 30, child: burbuja()),
-            
+            Positioned(
+              top: size.height * 0.12,
+              left: size.width * 0.08,
+              child: burbuja(size),
+            ),
+            Positioned(
+              top: size.height * 0.05,
+              left: size.width * -0.08,
+              child: burbuja(size),
+            ),
+            Positioned(
+              top: size.height * -0.1,
+              right: size.width * -0.05,
+              child: burbuja(size),
+            ),
+            Positioned(
+              bottom: size.height * -0.1,
+              left: size.width * 0.02,
+              child: burbuja(size),
+            ),
+            Positioned(
+              bottom: size.height * 0.24,
+              right: size.width * 0.05,
+              child: burbuja(size),
+            ),
+            Positioned(
+              top: size.height * 0.12,
+              left: size.width * 0.08,
+              child: burbuja(size),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Container burbuja() {
+  Container burbuja(Size size) {
     return Container(
-      width: 100,
-      height: 100,
+      width: size.width * 0.2,
+      height: size.width * 0.2,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(100),
+        borderRadius: BorderRadius.circular(size.width * 0.2),
         color: const Color.fromRGBO(255, 255, 255, 0.05),
       ),
     );
@@ -196,9 +217,9 @@ class CurvedClipper extends CustomClipper<Path> {
     Path path = Path();
     path.lineTo(0, size.height * 0.2); // start at the top left
     path.quadraticBezierTo(
-      5,
+      size.width * 0.02,
       size.height * 0.5,
-      100, // adjust this value to change the curve
+      size.width * 0.25, // adjust this value to change the curve
       size.height * 0.5,
     ); // curve to the left
     path.lineTo(size.width, size.height * 0.2); // bottom right

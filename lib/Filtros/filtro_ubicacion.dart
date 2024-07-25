@@ -3,29 +3,32 @@ import 'dart:io';
 import 'package:app_dlog/index/vista_detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 
 class VistaFiltro extends StatefulWidget {
-  const VistaFiltro({super.key, required this.barcode, required this.codSba});
+  const VistaFiltro({super.key, required this.barcode, required this.codSba, required this.jsonData});
   final String barcode;
   final String codSba;
+  final List<dynamic> jsonData;
 
   @override
   State<VistaFiltro> createState() => _VistaFiltroState();
 }
 
-/// aqui es la linea temporal
 class _VistaFiltroState extends State<VistaFiltro> {
   final List<String> _zona = ['A', 'B', 'C', 'D', 'E', 'F'];
   final List<String> _stand = ['1', '2', '3', '4', '5', '6'];
   final List<String> _fila = ['1', '2', '3', '4', '5', '6'];
   final List<String> _columna = ['1', '2', '3', '4', '5', '6'];
 
-  String? _selectedZona = 'A';
-  String? _selectedStand = '1';
+  String? _selectedZona ;
+  String? _selectedStand ;
   String? _selectedFila;
   String? _selectedColumna;
   File? _image;
   List<File> _images = [];
+  final TextEditingController _cantidadController = TextEditingController();
+  final TextEditingController _usuarioController = TextEditingController();
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
@@ -81,20 +84,62 @@ class _VistaFiltroState extends State<VistaFiltro> {
       'fila': _selectedFila,
       'columna': _selectedColumna,
       'imagen': _image?.path,
+      'cantidad': _cantidadController.text,
+      'imagenes': _images.map((image) => image.path).toList(),
+      'usuario': _usuarioController.text,
     };
     return jsonEncode(selectedValues);
   }
 
-  // ignore: unused_element
-  void _handleSubmit() {
-    String jsonData = getSelectedValuesAsJson();
-    // ignore: avoid_print
-    print(
-        jsonData); // Aquí puedes enviar los datos a tu backend o guardarlos donde necesites
-    // Por ejemplo, puedes llamar a un método que inserte los datos en la base de datos
+  Future<void> enviarData() async {
+    try {
+      final url = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
+
+      final response = await http.post(Uri.parse(url), body: {
+        'search': widget.codSba,
+        'zona': _selectedZona,
+        'stand': _selectedStand,
+        'col': _selectedColumna,
+        'fil': _selectedFila,
+        'cantidad': _cantidadController.text,
+        'usuario': _usuarioController.text,
+        'img': jsonEncode(_images.map((image) => image.path).toList())
+        
+      });
+
+      if (response.statusCode == 200) {
+        final newData = {
+          'zona': _selectedZona,
+          'stand': _selectedStand,
+          'col': _selectedColumna,
+          'fil': _selectedFila,
+          'cantidad': _cantidadController.text,
+          'usuario': _usuarioController.text,
+          'img': _images.map((image) => image.path).toList()
+          
+        };
+        print(newData);
+        _clearTextControllers();
+      } else {
+        print('Error al enviar datos a la API. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
-  final TextEditingController _cantidadController = TextEditingController();
+  void _clearTextControllers() {
+    _cantidadController.clear();
+    _usuarioController.clear();
+    setState(() {
+      _selectedZona = 'A';
+      _selectedStand = '1';
+      _selectedFila = null;
+      _selectedColumna = null;
+      _image = null;
+      _images.clear();
+    });
+  }
 
   void _removeImage(File image) {
     setState(() {
@@ -139,6 +184,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
           ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
+              
               SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -194,7 +240,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 20),
                     Center(
                       child: GestureDetector(
                         onTap: () => _showImageSourceActionSheet(context),
@@ -259,7 +305,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                             }).toList(),
                           )
                         : const Text('No hay imágenes seleccionadas.'),
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 20),
                     Row(
                       children: [
                         const SizedBox(
@@ -284,34 +330,37 @@ class _VistaFiltroState extends State<VistaFiltro> {
                         ),
                       ],
                     ),
-
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        
+                      ],
+                    ),
                   ],
                 ),
-                
               ),
-        
-              
-              
             ],
           ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: MaterialButton(
-                
-                onPressed: () {},
-                color: const Color.fromARGB(255, 50, 54, 44),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 340,
-                    vertical: 20,
-                  ),
-                  child: const Text(
-                    'Agregar',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
+        onPressed: enviarData,
+        color: const Color.fromARGB(255, 50, 54, 44),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 40,
+            vertical: 20,
+          ),
+          child: const Text(
+            'Agregar',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ),
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
     );
   }
