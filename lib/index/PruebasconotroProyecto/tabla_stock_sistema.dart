@@ -99,7 +99,7 @@ class TablaAlmacen extends StatelessWidget {
               ? Container(
                   width: 700,
                   child: Card(
-                    elevation: 50,
+                    elevation: 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),

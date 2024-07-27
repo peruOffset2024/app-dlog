@@ -62,7 +62,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => VistaFiltro(
           barcode: widget.barcode,
-          codSba: widget.codSba,
+          codSba: widget.codSba, jsonData: [],
         ),
         transitionDuration: const Duration(milliseconds: 500),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -75,7 +75,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
           );
         },
       ),
-    );//.then((_) => Navigator.pop(context));
+    );
   }
 
   void _eliminarStockFisico(int index) {

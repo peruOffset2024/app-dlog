@@ -12,7 +12,7 @@ class NuevaVistaDetalle extends StatefulWidget {
       required this.jsonDataUbi,
       required this.codigoSba, required this.barcode});
   
-  final TextEditingController codigoSba;
+  final String codigoSba;
   final String barcode;
 
   final List<dynamic> jsonData;
@@ -56,11 +56,12 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
   }
 
   void _navegarSiguientePag() {
+    final codigoSba3 = widget.codigoSba;
     Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            VistaFiltro(barcode: widget.barcode, codSba: widget.codigoSba.text, jsonData: widget.jsonData, ),
+            VistaFiltro(barcode: widget.barcode, codSba: codigoSba3, jsonData: widget.jsonData, ),
         transitionDuration: const Duration(milliseconds: 500),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(

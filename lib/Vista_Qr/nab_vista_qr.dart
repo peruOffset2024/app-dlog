@@ -10,8 +10,6 @@ import 'package:http/http.dart' as http;
 class IndexPagQr extends StatefulWidget {
   const IndexPagQr({super.key});
 
-  
-
   @override
   State<IndexPagQr> createState() => _IndexPagQrState();
 }
@@ -23,7 +21,6 @@ class _IndexPagQrState extends State<IndexPagQr> {
   List<dynamic> jsonDataUbi = [];
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       body: ListView(
         children: [
@@ -80,7 +77,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
                           elevation: 20,
                           backgroundColor:
                               const Color.fromARGB(255, 59, 252, 232),
-                          onPressed: _scanearCodigo,
+                          onPressed: _scanearCodigo1,
                           child: const Icon(
                             Icons.qr_code,
                             size: 50,
@@ -111,43 +108,49 @@ class _IndexPagQrState extends State<IndexPagQr> {
           setState(() {
             jsonData = data is List<dynamic> ? data : [];
           });
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  NuevaVistaDetalle(jsonData: jsonData, jsonDataUbi: jsonDataUbi, codigoSba: _codigoSbaController, barcode: '',),
-              transitionDuration: const Duration(milliseconds: 500),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(1.0, 0.0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                );
-              },
-            ),
-          );
-        } else{
+        } else {
           setState(() {
             jsonData = [];
           });
           print('Error al consumir el API');
         }
-      }else{
+      } else {
         print('Ingrese un codigo SBA valido');
       }
 
       // codigo para consumir el api de la url de Ubicaciones
 
-      final UrlUbicaciones = 'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$codigoSba';
+      final UrlUbicaciones =
+          'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$codigoSba';
       final responseUbicaciones = await http.get(Uri.parse(UrlUbicaciones));
-      if(responseUbicaciones.statusCode == 200){
+      if (responseUbicaciones.statusCode == 200) {
         final dataUbi = jsonDecode(responseUbicaciones.body);
         setState(() {
           jsonDataUbi = dataUbi is List<dynamic> ? dataUbi : [];
         });
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                NuevaVistaDetalle(
+              jsonData: jsonData,
+              jsonDataUbi: jsonDataUbi,
+              codigoSba: codigoSba,
+              barcode: '',
+            ),
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1.0, 0.0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          ),
+        );
       } else {
         setState(() {
           jsonDataUbi = [];
@@ -163,7 +166,80 @@ class _IndexPagQrState extends State<IndexPagQr> {
     }
   }
 
+  Future<void> _scanearCodigo1() async {
+    try {
+      String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', 'Cancelar', true, ScanMode.QR);
+      if (barcodeScanRes != '-1') {
+        final url =
+            'http://190.107.181.163:81/amq/flutter_ajax.php?search=$barcodeScanRes';
+        final response = await http.get(Uri.parse(url));
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          setState(() {
+            jsonData = data is List<dynamic> ? data : [];
+          });
+        } else {
+          setState(() {
+            jsonData = [];
+          });
+          // ignore: avoid_print
+          print('Error al obtener datos desde el escaneo QR');
+        }
 
+        // Realizar petición GET a la ruta del API para obtener los datos de ubicación
+        final codigoSba = _codigoSbaController.text;
+        final urlUbi =
+            'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$barcodeScanRes';
+        final responseUbi = await http.get(Uri.parse(urlUbi));
+        if (responseUbi.statusCode == 200) {
+          final dataUbi = jsonDecode(responseUbi.body);
+          setState(() {
+            jsonDataUbi = dataUbi is List<dynamic> ? dataUbi : [];
+          });
+          bool? hasVibrator = await Vibration.hasVibrator();
+          if (hasVibrator == true) {
+            Vibration.vibrate();
+          }
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  NuevaVistaDetalle(
+                jsonData: jsonData,
+                jsonDataUbi: jsonDataUbi,
+                codigoSba: codigoSba,
+                barcode: barcodeScanRes,
+              ),
+              transitionDuration: const Duration(milliseconds: 500),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(1.0, 0.0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                );
+              },
+            ),
+          );
+        } else {
+          setState(() {
+            jsonDataUbi = [];
+          });
+          // ignore: avoid_print
+          print('Error al obtener datos de ubicación desde el escaneo QR');
+        }
+      } else {
+        // ignore: avoid_print
+        print('Escaneo QR cancelado');
+      }
+    } on PlatformException catch (e) {
+      // ignore: avoid_print
+      print('Error al escanear QR: $e');
+    }
+  }
 
   Future<void> _scanearCodigo() async {
     String barcodeScanRes;

@@ -96,7 +96,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
       final url = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
 
       final response = await http.post(Uri.parse(url), body: {
-        'search': widget.codSba,
+        'search': widget.jsonData.first['ItemCode'],
         'zona': _selectedZona,
         'stand': _selectedStand,
         'col': _selectedColumna,
@@ -189,19 +189,25 @@ class _VistaFiltroState extends State<VistaFiltro> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+
+                    Text('aqui el cod:  ${widget.barcode}'),
                     Text(
-                      'DETALLE ITEM : ${widget.codSba.isNotEmpty ? widget.barcode : widget.barcode}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+                    ' DETALLE ITEM : ${widget.jsonData.first['ItemCode'] ?? 'N/A'}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
-                    const Text(
-                      'COUCHE BRILLO',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    widget.jsonData.first['itemdescripcion'] ??
+                        'Descripción no disponible',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold
                     ),
+                  ),
                     const SizedBox(height: 20),
                     _buildDropdownField('ZONA', _zona, _selectedZona,
                         (String? newValue) {
@@ -306,6 +312,8 @@ class _VistaFiltroState extends State<VistaFiltro> {
                           )
                         : const Text('No hay imágenes seleccionadas.'),
                     const SizedBox(height: 20),
+
+                    Text('$_image[img]'),
                     Row(
                       children: [
                         const SizedBox(
@@ -331,14 +339,13 @@ class _VistaFiltroState extends State<VistaFiltro> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        const SizedBox(
-                          width: 20,
-                        ),
-                        
-                      ],
-                    ),
+                    Text(
+                                getSelectedValuesAsJson(),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black,
+                                ),
+                              ),
                   ],
                 ),
               ),

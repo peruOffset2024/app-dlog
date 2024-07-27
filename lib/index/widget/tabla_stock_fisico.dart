@@ -75,6 +75,8 @@ class TablaStockFisico extends StatelessWidget {
           ),
         ),
       ],
+
+      
       rows: List<DataRow>.generate(
         stockFisicoList.length,
         (index) => DataRow(

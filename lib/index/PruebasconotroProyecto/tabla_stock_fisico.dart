@@ -1,21 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class TablaUbicacion extends StatefulWidget {
-  final TextEditingController codigoSba;
+  final String codigoSba;
   final List<dynamic> jsonData;
   final List<dynamic> jsonDataUbi;
-  //final void Function(String zona, String stand, String col, String fila, String cantidad) onInsertarUbicacion;
-  //final void Function(String id, String zona, String stand, String col, String fila, String cantidad) onActualizarUbicacion;
-  //final void Function(String id) onEliminarUbicacion;
 
   TablaUbicacion({
     Key? key,
     required this.jsonData,
     required this.jsonDataUbi,
-    //required this.onInsertarUbicacion,
-    // required this.onActualizarUbicacion,
-    //required this.onEliminarUbicacion,
     required this.codigoSba,
     required List resultados,
   }) : super(key: key);
@@ -74,20 +70,16 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
         'Img': ubicacion['Img'] ?? '',
       });
 
-
       if (response.statusCode == 200) {
-        // final jsonResponse = jsonDecode(response.body);
         setState(() {
-          final index = widget.jsonDataUbi
-              .indexWhere((element) => element['id'] == ubicacion['id']);
+          final index = widget.jsonDataUbi.indexWhere((element) => element['id'] == ubicacion['id']);
           if (index != -1) {
             widget.jsonDataUbi[index] = ubicacion;
             _clearTextControllers();
           }
         });
       } else {
-        print(
-            'Error al actualizar la ubicación. Código de estado: ${response.statusCode}');
+        print('Error al actualizar la ubicación. Código de estado: ${response.statusCode}');
       }
     } catch (e) {
       print('Error: $e');
@@ -96,7 +88,7 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
 
   Future<void> enviarData() async {
     try {
-      final sbaCodigoUbi = widget.codigoSba.text;
+      final sbaCodigoUbi = widget.codigoSba;
       final url = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
 
       final response = await http.post(Uri.parse(url), body: {
@@ -127,50 +119,59 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
           _clearTextControllers();
         });
       } else {
-        print(
-            'Error al enviar datos a la API. Código de estado: ${response.statusCode}');
+        print('Error al enviar datos a la API. Código de estado: ${response.statusCode}');
       }
     } catch (e) {
       print('Error: $e');
     }
   }
 
-  /*void mostrarFormularioUbicacion({Map<String, dynamic>? mapUbicacion}) {
-  Navigator.push(
-    context,
-    PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => UbicacionEditFormScreen(mapUbicacion: mapUbicacion),
-      transitionDuration: const Duration(milliseconds: 2000),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return ScaleTransition(
-          scale: animation,
-          child: child,
+  void _eliminarData(int index) {
+    setState(() {
+      widget.jsonDataUbi.removeAt(index);
+    });
+  }
+
+  Future<dynamic> _alertMensaje(BuildContext context, int index) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('ALERTA'),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '¿ESTAS SEGURO QUE DESEAS BORRAR?',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    _eliminarData(index);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('SI'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('NO'),
+                ),
+              ],
+            ),
+          ],
         );
       },
-    ),
-  );
-}*/
-//UbicacionAddForm
-/*void mostrarFormularioUbicacionAgregar({Map<String, dynamic>? mapUbicacion}) {
-  Navigator.push(
-    context,
-    PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => UbicacionAddForm(),
-      transitionDuration: const Duration(milliseconds: 2500),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: Offset(1.0, 0.0), // Invertimos el begin
-            end: Offset.zero, // Invertimos el end
-          ).animate(animation),
-          child: child,
-        );
-      },
-      opaque: false, // Invertimos opaque
-      barrierDismissible: true, // Invertimos barrierDismissible
-    ),
-  );
-}*/
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -233,7 +234,7 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                 ? Container(
                     width: 700,
                     child: Card(
-                      elevation: 50,
+                      elevation: 2,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -242,7 +243,7 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                         child: DataTable(
                           columnSpacing: 10.0,
                           horizontalMargin: 20.0,
-                          headingRowColor: WidgetStateColor.resolveWith(
+                          headingRowColor: MaterialStateColor.resolveWith(
                             (states) => Colors.grey[300]!,
                           ),
                           columns: const [
@@ -302,7 +303,7 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                             ),
                             DataColumn(
                               label: Text(
-                                'ADD',
+                                'IMG',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -312,12 +313,13 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                           ],
                           rows: [
                             ...widget.jsonDataUbi.map<DataRow>((data) {
+                              final index = widget.jsonDataUbi.indexOf(data);
                               return DataRow(
                                 cells: [
                                   DataCell(IconButton(
                                     icon: Icon(Icons.delete),
                                     onPressed: () {
-                                      //  mostrarFormularioUbicacion(mapUbicacion: data);
+                                      _alertMensaje(context, index);
                                     },
                                   )),
                                   DataCell(Container(
@@ -357,9 +359,9 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                                     ),
                                   )),
                                   DataCell(IconButton(
-                                    icon: Icon(Icons.add),
+                                    icon: Icon(Icons.image),
                                     onPressed: () {
-                                      //  mostrarFormularioUbicacionAgregar();
+                                      // Aquí debe ir la lógica para mostrar la imagen
                                     },
                                   )),
                                 ],
@@ -368,15 +370,15 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                             DataRow(
                               cells: [
                                 DataCell(Container(
-                                  padding: EdgeInsets.all(8),
-                                  child: Text(
+                                  padding: const EdgeInsets.all(8),
+                                  child: const Text(
                                     '',
                                     style: TextStyle(fontSize: 14),
                                   ),
                                 )),
                                 DataCell(Container(
                                   padding: EdgeInsets.all(8),
-                                  child: Text(
+                                  child: const Text(
                                     'TOTAL',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -433,12 +435,9 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                   )
                 : const Center(child: Text('')),
 
-            // No hay ubicaciones disponibles+++++++++
-            
-
             SizedBox(height: 20),
             if (widget.jsonData.isNotEmpty) ...[
-              _buildDiferencias( totalCantidadAlmacen,  totalCantidadUbicaciones, diferencia),
+              _buildDiferencias(totalCantidadAlmacen, totalCantidadUbicaciones, diferencia),
             ],
           ],
         ),
@@ -514,8 +513,6 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                       ),
                     ),
                   ),
-
-               
                 ],
               ),
             ],
@@ -525,5 +522,17 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
     );
   }
 
-  
+Future<void> obtenerImagenes() async {
+  final url = 'http://190.107.181.163:81/amq/uploads/';
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    // Procesar la respuesta
+    final jsonData = jsonDecode(response.body);
+    // jsonData es un objeto que contiene la lista de imágenes
+    print(jsonData);
+  } else {
+    print('Error al obtener las imágenes: ${response.statusCode}');
+  }
+}
 }
