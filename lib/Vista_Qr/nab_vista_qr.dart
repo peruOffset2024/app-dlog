@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:app_dlog/index/nueva_vista_detalle.dart';
-import 'package:app_dlog/index/vista_detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -241,57 +240,4 @@ class _IndexPagQrState extends State<IndexPagQr> {
     }
   }
 
-  Future<void> _scanearCodigo() async {
-    String barcodeScanRes;
-    try {
-      // ignore: avoid_print
-      print('Iniciando escaneo...'); // Depuración
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666', // color del scanner
-        'Cancelar', // texto del botón cancelar
-        true, // mostrar flash
-        ScanMode.QR, // modo de escaneo QR
-      );
-      // ignore: avoid_print
-      print('Resultado del escaneo: $barcodeScanRes'); // Depuración
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
-    }
-
-    if (!mounted) return;
-
-    if (barcodeScanRes != "-1") {
-      // ignore: avoid_print
-      print('Código escaneado: $barcodeScanRes'); // Depuración
-      bool? hasVibrator = await Vibration.hasVibrator();
-      if (hasVibrator == true) {
-        Vibration.vibrate();
-      }
-
-      Navigator.push(
-        // ignore: use_build_context_synchronously
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => VistaDetalle(
-            barcode: barcodeScanRes,
-            codSba: barcodeScanRes, // Usar el resultado del escaneo como codSba
-          ),
-          transitionDuration: const Duration(milliseconds: 500),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(1.0, 0.0),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            );
-          },
-        ),
-      );
-    } else {
-      // si se cancela, no hacer nada o mostrar un mensaje
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Escaneo Cancelado")));
-    }
-  }
 }

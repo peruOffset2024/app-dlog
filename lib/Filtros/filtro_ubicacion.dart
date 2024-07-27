@@ -6,7 +6,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
 class VistaFiltro extends StatefulWidget {
-  const VistaFiltro({super.key, required this.barcode, required this.codSba, required this.jsonData});
+  const VistaFiltro(
+      {super.key,
+      required this.barcode,
+      required this.codSba,
+      required this.jsonData});
   final String barcode;
   final String codSba;
   final List<dynamic> jsonData;
@@ -21,20 +25,53 @@ class _VistaFiltroState extends State<VistaFiltro> {
   final List<String> _fila = ['1', '2', '3', '4', '5', '6'];
   final List<String> _columna = ['1', '2', '3', '4', '5', '6'];
 
-  String? _selectedZona ;
-  String? _selectedStand ;
+  String? _selectedZona;
+  String? _selectedStand;
   String? _selectedFila;
   String? _selectedColumna;
-  File? _image;
   List<File> _images = [];
   final TextEditingController _cantidadController = TextEditingController();
   final TextEditingController _usuarioController = TextEditingController();
+  List<dynamic> jsonDataUbi2 = [];
+
+  Future<void> obtenerDatosUbicacion() async {
+    final codigosbaUbi = widget.jsonData.first['ItemCode'];
+    try {
+      if (codigosbaUbi.isNotEmpty) {
+        final urlUbi =
+            'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$codigosbaUbi';
+        final response = await http.get(Uri.parse(urlUbi));
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          setState(() {
+            jsonDataUbi2 = data is List<dynamic> ? data : [];
+          });
+        } else {
+          setState(() {
+            jsonDataUbi2 = [];
+          });
+          print(
+              'Error al consumir el API. Código de estado: ${response.statusCode}');
+        }
+      } else {
+        setState(() {
+          jsonDataUbi2 = [];
+        });
+        print('Código SBA vacío');
+      }
+    } catch (e) {
+      setState(() {
+        jsonDataUbi2 = [];
+      });
+      print('Error: $e');
+    }
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
     if (pickedFile != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _images.add(File(pickedFile.path));
       });
     }
   }
@@ -81,51 +118,13 @@ class _VistaFiltroState extends State<VistaFiltro> {
     Map<String, dynamic> selectedValues = {
       'zona': _selectedZona,
       'stand': _selectedStand,
-      'fila': _selectedFila,
-      'columna': _selectedColumna,
-      'imagen': _image?.path,
+      'fil': _selectedFila,
+      'col': _selectedColumna,
       'cantidad': _cantidadController.text,
-      'imagenes': _images.map((image) => image.path).toList(),
+      'img': _images.map((image) => image.path).toList(),
       'usuario': _usuarioController.text,
     };
     return jsonEncode(selectedValues);
-  }
-
-  Future<void> enviarData() async {
-    try {
-      final url = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
-
-      final response = await http.post(Uri.parse(url), body: {
-        'search': widget.jsonData.first['ItemCode'],
-        'zona': _selectedZona,
-        'stand': _selectedStand,
-        'col': _selectedColumna,
-        'fil': _selectedFila,
-        'cantidad': _cantidadController.text,
-        'usuario': _usuarioController.text,
-        'img': jsonEncode(_images.map((image) => image.path).toList())
-        
-      });
-
-      if (response.statusCode == 200) {
-        final newData = {
-          'zona': _selectedZona,
-          'stand': _selectedStand,
-          'col': _selectedColumna,
-          'fil': _selectedFila,
-          'cantidad': _cantidadController.text,
-          'usuario': _usuarioController.text,
-          'img': _images.map((image) => image.path).toList()
-          
-        };
-        print(newData);
-        _clearTextControllers();
-      } else {
-        print('Error al enviar datos a la API. Status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
   }
 
   void _clearTextControllers() {
@@ -136,9 +135,54 @@ class _VistaFiltroState extends State<VistaFiltro> {
       _selectedStand = '1';
       _selectedFila = null;
       _selectedColumna = null;
-      _image = null;
       _images.clear();
     });
+  }
+
+  Future<void> enviarData() async {
+    try {
+      //final ubiSbaCod = widget.jsonData.first['ItemCode'];
+      final url = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
+
+      final response = await http.post(Uri.parse(url), body: jsonEncode({
+          'search': widget.codSba,
+          'zona': _selectedZona,
+          'stand': _selectedStand,
+          'col': _selectedColumna,
+          'fil': _selectedFila,
+          'cantidad': _cantidadController.text,
+          'usuario': _usuarioController.text,
+          'img': _images.map((image) => image.path).toList(),
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final newData = {
+          'search': widget.jsonData.first['ItemCode'],
+          'zona': _selectedZona,
+          'stand': _selectedStand,
+          'col': _selectedColumna,
+          'fil': _selectedFila,
+          'cantidad': _cantidadController.text,
+          'usuario': _usuarioController.text,
+          'img': _images.map((image) => image.path).toList(),
+          
+        };
+        setState(() {
+          jsonDataUbi2.add(newData);
+        });
+        print('Los datos enviado:... $newData');
+        print('AQUI LA RESPUESTA DEL SERVIDOR:... ${response.statusCode}');
+        print(jsonDataUbi2);
+        print(newData);
+        _clearTextControllers();
+      } else {
+        print(
+            'Error al enviar datos a la API. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   void _removeImage(File image) {
@@ -173,7 +217,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                   );
                 },
               ),
-            ); //.then((_) => Navigator.pop(context));
+            );
           },
           icon: const Icon(Icons.arrow_back),
         ),
@@ -184,30 +228,27 @@ class _VistaFiltroState extends State<VistaFiltro> {
           ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              
               SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-
-                    Text('aqui el cod:  ${widget.barcode}'),
+                    Text('aqui el cod:  ${widget.codSba}'),
                     Text(
-                    ' DETALLE ITEM : ${widget.jsonData.first['ItemCode'] ?? 'N/A'}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      ' DETALLE ITEM : ${widget.jsonData.first['ItemCode'] ?? 'N/A'}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-                  Text(
-                    widget.jsonData.first['itemdescripcion'] ??
-                        'Descripción no disponible',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold
+                    Text(
+                      widget.jsonData.first['itemdescripcion'] ??
+                          'Descripción no disponible',
+                      style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold),
                     ),
-                  ),
                     const SizedBox(height: 20),
                     _buildDropdownField('ZONA', _zona, _selectedZona,
                         (String? newValue) {
@@ -257,11 +298,11 @@ class _VistaFiltroState extends State<VistaFiltro> {
                             borderRadius: BorderRadius.circular(20),
                             color: const Color.fromARGB(255, 120, 193, 241),
                           ),
-                          child: _image != null
+                          child: _images.isNotEmpty
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(20),
                                   child: Image.file(
-                                    _image!,
+                                    _images.last,
                                     fit: BoxFit.cover,
                                   ),
                                 )
@@ -301,7 +342,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                                         ),
                                         child: const Icon(
                                           Icons.close,
-                                          color: Colors.white,
+                                          color: Colors.transparent,
                                         ),
                                       ),
                                     ),
@@ -310,10 +351,13 @@ class _VistaFiltroState extends State<VistaFiltro> {
                               );
                             }).toList(),
                           )
-                        : const Text('No hay imágenes seleccionadas.'),
+                        : Column(
+                            children: [
+                              const Text('No hay imágenes seleccionadas.'),
+                              const SizedBox(height: 10),
+                            ],
+                          ),
                     const SizedBox(height: 20),
-
-                    Text('$_image[img]'),
                     Row(
                       children: [
                         const SizedBox(
@@ -340,12 +384,12 @@ class _VistaFiltroState extends State<VistaFiltro> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                                getSelectedValuesAsJson(),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black,
-                                ),
-                              ),
+                      getSelectedValuesAsJson(),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -355,7 +399,10 @@ class _VistaFiltroState extends State<VistaFiltro> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: MaterialButton(
-        onPressed: enviarData,
+        onPressed: () {
+          obtenerDatosUbicacion();
+          enviarData();
+        },
         color: const Color.fromARGB(255, 50, 54, 44),
         child: Container(
           padding: const EdgeInsets.symmetric(
