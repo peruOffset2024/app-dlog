@@ -6,11 +6,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
 class VistaFiltro extends StatefulWidget {
-  const VistaFiltro(
-      {super.key,
-      required this.barcode,
-      required this.codSba,
-      required this.jsonData});
+  const VistaFiltro({
+    super.key,
+    required this.barcode,
+    required this.codSba,
+    required this.jsonData,
+  });
   final String barcode;
   final String codSba;
   final List<dynamic> jsonData;
@@ -32,36 +33,41 @@ class _VistaFiltroState extends State<VistaFiltro> {
   List<File> _images = [];
   final TextEditingController _cantidadController = TextEditingController();
   final TextEditingController _usuarioController = TextEditingController();
-  List<dynamic> jsonDataUbi2 = [];
+  List<dynamic> jsonDataUbi = [];
 
-  Future<void> obtenerDatosUbicacion() async {
-    final codigosbaUbi = widget.jsonData.first['ItemCode'];
+  @override
+  void initState() {
+    super.initState();
+    obtenerDatosUbicacion(widget.codSba);
+  }
+
+  Future<void> obtenerDatosUbicacion(String codSba) async {
     try {
-      if (codigosbaUbi.isNotEmpty) {
+      if (codSba.isNotEmpty) {
         final urlUbi =
-            'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$codigosbaUbi';
+            'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$codSba';
         final response = await http.get(Uri.parse(urlUbi));
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           setState(() {
-            jsonDataUbi2 = data is List<dynamic> ? data : [];
+            jsonDataUbi = data is List<dynamic> ? data : [];
           });
         } else {
           setState(() {
-            jsonDataUbi2 = [];
+            jsonDataUbi = [];
           });
           print(
               'Error al consumir el API. Código de estado: ${response.statusCode}');
         }
       } else {
         setState(() {
-          jsonDataUbi2 = [];
+          jsonDataUbi = [];
         });
         print('Código SBA vacío');
       }
     } catch (e) {
       setState(() {
-        jsonDataUbi2 = [];
+        jsonDataUbi = [];
       });
       print('Error: $e');
     }
@@ -114,75 +120,90 @@ class _VistaFiltroState extends State<VistaFiltro> {
     );
   }
 
-  String getSelectedValuesAsJson() {
-    Map<String, dynamic> selectedValues = {
-      'zona': _selectedZona,
-      'stand': _selectedStand,
-      'fil': _selectedFila,
-      'col': _selectedColumna,
-      'cantidad': _cantidadController.text,
-      'img': _images.map((image) => image.path).toList(),
-      'usuario': _usuarioController.text,
-    };
-    return jsonEncode(selectedValues);
+
+
+Future<void> enviarData() async {
+  if (_selectedZona == null ||
+      _selectedStand == null ||
+      _selectedFila == null ||
+      _selectedColumna == null ||
+      _cantidadController.text.isEmpty ||
+      _usuarioController.text.isEmpty ||
+      _images.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Por favor, completa todos los campos')),
+    );
+    return;
   }
+
+  try {
+    final codigoSba = widget.codSba;
+    final uploadUrl = 'http://190.107.181.163:81/amq/flutter_ajax_add.php'; // URL del script PHP
+
+    // Preparar la solicitud para enviar imágenes y datos
+    var request = http.MultipartRequest('POST', Uri.parse(uploadUrl))
+      ..fields['search'] = codigoSba
+      ..fields['ubicacion'] = codigoSba
+      ..fields['zona'] = _selectedZona!
+      ..fields['stand'] = _selectedStand!
+      ..fields['col'] = _selectedColumna!
+      ..fields['fil'] = _selectedFila!
+      ..fields['cantidad'] = _cantidadController.text
+      ..fields['usuario'] = _usuarioController.text;
+      print(codigoSba);
+      print(_selectedZona);
+      print(_selectedStand);
+      print(_selectedColumna);
+      print(_selectedFila);
+      print(_cantidadController);
+      print(_usuarioController);
+
+
+    // Añadir imágenes a la solicitud
+    for (var image in _images) {
+      var file = await http.MultipartFile.fromPath('img[]', image.path);
+      request.files.add(file);
+      print(image);
+    }
+
+    
+
+    // Enviar la solicitud
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      var responseBody = await response.stream.bytesToString();
+      var responseData = json.decode(responseBody);
+      if (responseData['success'] != null) {
+        setState(() {
+          // Actualizar datos si es necesario
+          _clearTextControllers();
+        });
+        print('Datos insertados correctamente');
+      } else if (responseData['error'] != null) {
+        print('Error: ${responseData['error']}');
+      }
+    } else {
+      print('Error al enviar datos a la API. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error: $e');
+  }
+}
+
+
+
 
   void _clearTextControllers() {
     _cantidadController.clear();
     _usuarioController.clear();
     setState(() {
-      _selectedZona = 'A';
-      _selectedStand = '1';
+      _selectedZona = null;
+      _selectedStand = null;
       _selectedFila = null;
       _selectedColumna = null;
       _images.clear();
     });
-  }
-
-  Future<void> enviarData() async {
-    try {
-      //final ubiSbaCod = widget.jsonData.first['ItemCode'];
-      final url = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
-
-      final response = await http.post(Uri.parse(url), body: jsonEncode({
-          'search': widget.codSba,
-          'zona': _selectedZona,
-          'stand': _selectedStand,
-          'col': _selectedColumna,
-          'fil': _selectedFila,
-          'cantidad': _cantidadController.text,
-          'usuario': _usuarioController.text,
-          'img': _images.map((image) => image.path).toList(),
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final newData = {
-          'search': widget.jsonData.first['ItemCode'],
-          'zona': _selectedZona,
-          'stand': _selectedStand,
-          'col': _selectedColumna,
-          'fil': _selectedFila,
-          'cantidad': _cantidadController.text,
-          'usuario': _usuarioController.text,
-          'img': _images.map((image) => image.path).toList(),
-          
-        };
-        setState(() {
-          jsonDataUbi2.add(newData);
-        });
-        print('Los datos enviado:... $newData');
-        print('AQUI LA RESPUESTA DEL SERVIDOR:... ${response.statusCode}');
-        print(jsonDataUbi2);
-        print(newData);
-        _clearTextControllers();
-      } else {
-        print(
-            'Error al enviar datos a la API. Status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
   }
 
   void _removeImage(File image) {
@@ -221,233 +242,205 @@ class _VistaFiltroState extends State<VistaFiltro> {
           },
           icon: const Icon(Icons.arrow_back),
         ),
-        backgroundColor: const Color.fromARGB(255, 33, 150, 243),
       ),
       body: Stack(
         children: [
-          ListView(
-            padding: const EdgeInsets.all(16.0),
-            children: [
-              SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text('aqui el cod:  ${widget.codSba}'),
-                    Text(
-                      ' DETALLE ITEM : ${widget.jsonData.first['ItemCode'] ?? 'N/A'}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Text(
-                      widget.jsonData.first['itemdescripcion'] ??
-                          'Descripción no disponible',
-                      style: const TextStyle(
-                          fontSize: 18,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildDropdownField('ZONA', _zona, _selectedZona,
-                        (String? newValue) {
-                      setState(() {
-                        _selectedZona = newValue;
-                      });
-                    }),
-                    const SizedBox(height: 20),
-                    _buildDropdownField('Stand', _stand, _selectedStand,
-                        (String? newValue) {
-                      setState(() {
-                        _selectedStand = newValue;
-                      });
-                    }),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: _buildDropdownField(
-                              'Fila', _fila, _selectedFila, (String? newValue) {
-                            setState(() {
-                              _selectedFila = newValue;
-                            });
-                          }),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildDropdownField(
-                              'Columna', _columna, _selectedColumna,
-                              (String? newValue) {
-                            setState(() {
-                              _selectedColumna = newValue;
-                            });
-                          }),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () => _showImageSourceActionSheet(context),
-                        child: Container(
-                          width: 300,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: const Color.fromARGB(255, 120, 193, 241),
-                          ),
-                          child: _images.isNotEmpty
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Image.file(
-                                    _images.last,
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                              : const Icon(
-                                  Icons.upload_file_rounded,
-                                  size: 100,
-                                  color: Colors.white,
-                                ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _images.isNotEmpty
-                        ? Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
-                            children: _images.map((image) {
-                              return Stack(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Image.file(
-                                      image,
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    right: 0,
-                                    child: GestureDetector(
-                                      onTap: () => _removeImage(image),
-                                      child: Container(
-                                        decoration: const BoxDecoration(
-                                          color: Colors.transparent,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.close,
-                                          color: Colors.transparent,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                          )
-                        : Column(
-                            children: [
-                              const Text('No hay imágenes seleccionadas.'),
-                              const SizedBox(height: 10),
-                            ],
-                          ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        const SizedBox(
-                          width: 20,
-                        ),
-                        Card(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          child: SizedBox(
-                            width: 200,
-                            child: TextFormField(
-                              controller: _cantidadController,
-                              autocorrect: false,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.grey),
-                                  ),
-                                  hintText: 'CANTIDAD'),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      getSelectedValuesAsJson(),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.fromARGB(255, 157, 172, 179), // Color inicial
+                  Color.fromARGB(255, 255, 255, 255), // Color final
+                ],
               ),
-            ],
+            ),
+            child: ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: [
+                SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        ' DETALLE ITEM : ${widget.jsonData.first['ItemCode'] ?? 'N/A'}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        widget.jsonData.first['itemdescripcion'] ??
+                            'Descripción no disponible',
+                        style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildDropdownField('ZONA', _zona, _selectedZona,
+                          (String? newValue) {
+                        setState(() {
+                          _selectedZona = newValue;
+                        });
+                      }),
+                      const SizedBox(height: 20),
+                      _buildDropdownField('Stand', _stand, _selectedStand,
+                          (String? newValue) {
+                        setState(() {
+                          _selectedStand = newValue;
+                        });
+                      }),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: _buildDropdownField(
+                                'Fila', _fila, _selectedFila, (String? newValue) {
+                              setState(() {
+                                _selectedFila = newValue;
+                              });
+                            }),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildDropdownField(
+                                'Columna', _columna, _selectedColumna,
+                                (String? newValue) {
+                              setState(() {
+                                _selectedColumna = newValue;
+                              });
+                            }),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () => _showImageSourceActionSheet(context),
+                          child: Container(
+                            width: 300,
+                            height: 200,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Color.fromARGB(255, 49, 55, 59),
+                            ),
+                            child: _images.isNotEmpty
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: GridView.builder(
+                                      itemCount: _images.length,
+                                      gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 3,
+                                        crossAxisSpacing: 4.0,
+                                        mainAxisSpacing: 4.0,
+                                      ),
+                                      itemBuilder: (context, index) {
+                                        final image = _images[index];
+                                        return Stack(
+                                          children: [
+                                            Image.file(
+                                              image,
+                                              fit: BoxFit.cover,
+                                            ),
+                                            Positioned(
+                                              top: 0,
+                                              right: 25,
+                                              child: GestureDetector(
+                                                onTap: () => _removeImage(image),
+                                                child: Container(
+                                                  color: Colors.transparent,
+                                                  child: const Icon(
+                                                    Icons.close,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.camera_alt,
+                                    size: 50,
+                                    color: Colors.white,
+                                  ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: _cantidadController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Cantidad',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.numbers),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: _usuarioController,
+                        decoration: const InputDecoration(
+                          labelText: 'Usuario',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: MaterialButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        disabledColor: Colors.grey,
         onPressed: () {
-          obtenerDatosUbicacion();
+          obtenerDatosUbicacion(widget.codSba);
           enviarData();
         },
-        color: const Color.fromARGB(255, 50, 54, 44),
+        color: Color.fromARGB(255, 49, 55, 59),
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 40,
-            vertical: 20,
+          padding: EdgeInsets.symmetric(
+            horizontal: 338,
+            vertical: 30,
           ),
           child: const Text(
-            'Agregar',
-            style: TextStyle(color: Colors.white),
+            'Ingresar',
+            style: TextStyle(fontSize: 20, color: Colors.white),
           ),
         ),
       ),
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
     );
   }
 
-  Widget _buildDropdownField(
-    String label,
-    List<String> items,
-    String? selectedItem,
-    ValueChanged<String?> onChanged,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        DropdownButton<String>(
-          value: selectedItem,
-          hint: const Text('Seleccionar una opción'),
-          items: items.map((String item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(item),
-            );
-          }).toList(),
-          onChanged: onChanged,
-          isExpanded: true,
-        ),
-      ],
+  Widget _buildDropdownField(String label, List<String> items, String? value,
+      ValueChanged<String?> onChanged) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      onChanged: onChanged,
+      items: items.map((String item) {
+        return DropdownMenuItem<String>(
+          value: item,
+          child: Text(item , style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
+        );
+      }).toList(),
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      ),
     );
   }
 }

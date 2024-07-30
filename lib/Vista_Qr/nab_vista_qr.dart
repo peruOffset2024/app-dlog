@@ -19,79 +19,89 @@ class _IndexPagQrState extends State<IndexPagQr> {
   List<dynamic> jsonData = [];
   List<dynamic> jsonDataUbi = [];
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const SizedBox(
-                  height: 350,
-                ),
-                const Text('CONSULTAR EN AMP',
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(
-                  height: 50,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      SizedBox(
-                        width: 400,
-                        child: TextFormField(
-                          autocorrect: false,
-                          autofocus: false,
-                          controller: _codigoSbaController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            enabledBorder: OutlineInputBorder(),
-                            hintText: 'Ingrese Código SBA',
-                            prefixIcon: Icon(Icons.search),
-                          ),
-                          style: TextStyle(
-                            color: Colors.grey[800],
-                            shadows: const [
-                              Shadow(
-                                offset: Offset(0, 1),
-                                blurRadius: 2,
-                                color: Color.fromARGB(255, 156, 148, 148),
-                              ),
-                            ],
-                          ),
-                          onFieldSubmitted: (value) {
-                            _obtenerDatosApi();
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 2),
-                      SizedBox(
-                        height: 70,
-                        width: 70,
-                        child: FloatingActionButton(
-                          elevation: 20,
-                          backgroundColor:
-                              const Color.fromARGB(255, 59, 252, 232),
-                          onPressed: _scanearCodigo1,
-                          child: const Icon(
-                            Icons.qr_code,
-                            size: 50,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+               Color.fromARGB(255, 157, 172, 179),// Color inicial
+              Color.fromARGB(255, 255, 255, 255), // Color final
+            ],
           ),
-        ],
+        ),
+        child: ListView(
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    height: 350,
+                  ),
+                  const Text('CONSULTAR EN AMP',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(
+                    height: 50,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        SizedBox(
+                          width: 400,
+                          child: TextFormField(
+                            autocorrect: false,
+                            autofocus: false,
+                            controller: _codigoSbaController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              enabledBorder: OutlineInputBorder(),
+                              hintText: 'Ingrese Código SBA',
+                              prefixIcon: Icon(Icons.search),
+                            ),
+                            style: TextStyle(
+                              color: Colors.grey[800],
+                              shadows: const [
+                                Shadow(
+                                  offset: Offset(0, 1),
+                                  blurRadius: 2,
+                                  color: Color.fromARGB(255, 156, 148, 148),
+                                ),
+                              ],
+                            ),
+                            onFieldSubmitted: (value) {
+                              _obtenerDatosApi();
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        SizedBox(
+                          height: 70,
+                          width: 70,
+                          child: FloatingActionButton(
+                            elevation: 20,
+                            backgroundColor: const Color.fromARGB(255, 59, 252, 232),
+                            onPressed: _scanearCodigo1,
+                            child: const Icon(
+                              Icons.qr_code,
+                              size: 50,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
     );
   }
 

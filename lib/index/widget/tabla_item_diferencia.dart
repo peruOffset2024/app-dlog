@@ -12,7 +12,7 @@ class TablaItemsDiferencia extends StatelessWidget {
       columnSpacing: 110.0,
       horizontalMargin: 20.0,
       headingRowColor: WidgetStateColor.resolveWith(
-        (states) => const Color.fromARGB(169, 167, 219, 223),
+        (states) => Colors.grey[300]!,
       ),
       columns: const [
         DataColumn(

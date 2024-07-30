@@ -80,7 +80,7 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 33, 150, 243), //Pag1
+        //backgroundColor: const Color.fromARGB(255, 33, 150, 243), //Pag1
         leading: GestureDetector(
           onTap: () {
             Navigator.pop(
@@ -107,41 +107,54 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
       ),
       body: Stack(
         children: [
-          RefreshIndicator(
-            onRefresh: _refrescarPantalla,
-            child: FutureBuilder(
-                future: _actPantalla,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(
-                        child: Text("Error: ${snapshot.error.toString()} "));
-                  } else {
-                    return Center(
-                      child: SizedBox(
-                        width: 700,
-                        child: ListView(
-                          //  principal-------
-                          padding: EdgeInsets.all(16),
-                          children: [
-                            TablaAlmacen(
-                              jsonData: widget.jsonData,
-                              resultados: [],
-                              jsonDataUbi: widget.jsonDataUbi,
-                            ),
-                            TablaUbicacion(
-                              jsonData: widget.jsonData,
-                              jsonDataUbi: widget.jsonDataUbi,
-                              codigoSba: widget.codigoSba,
-                              resultados: [],
-                            ),
-                          ],
+          Container(
+            decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.fromARGB(255, 157, 172, 179), // Color inicial
+              Color.fromARGB(255, 255, 255, 255), // Color final
+            ],
+          ),
+        ),
+
+            child: RefreshIndicator(
+              onRefresh: _refrescarPantalla,
+              child: FutureBuilder(
+                  future: _actPantalla,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(
+                          child: Text("Error: ${snapshot.error.toString()} "));
+                    } else {
+                      return Center(
+                        child: SizedBox(
+                          width: 700,
+                          child: ListView(
+                            //  principal-------
+                            padding: EdgeInsets.all(16),
+                            children: [
+                              TablaAlmacen(
+                                jsonData: widget.jsonData,
+                                resultados: [],
+                                jsonDataUbi: widget.jsonDataUbi,
+                              ),
+                              TablaUbicacion(
+                                jsonData: widget.jsonData,
+                                jsonDataUbi: widget.jsonDataUbi,
+                                codigoSba: widget.codigoSba,
+                                resultados: [],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  }
-                }),
+                      );
+                    }
+                  }),
+            ),
           ),
           if (_arriba != 0 && _izquierdo != 0)
             Positioned(
