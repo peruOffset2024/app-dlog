@@ -361,74 +361,103 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                                       style: TextStyle(fontSize: 14),
                                     ),
                                   )),
-                                  DataCell(IconButton(
-                                    icon: Icon(Icons.image),
-                                    onPressed: () {
-                                      // Obtener la URL de las imágenes desde jsonDataUbi
-                                      final imageUrls = data['Img'] as String?;
-                                        print(imageUrls);
-                                      // Separar las URLs por comas (o el delimitador que estés usando)
-                                      final imageUrlList =
-                                          imageUrls?.split(',') ?? [];
+                                  DataCell(
+                                    IconButton(
+                                      icon: Icon(Icons.image),
+                                      onPressed: () {
+                                        // Obtener la cadena que contiene las URLs de las imágenes desde jsonDataUbi
+                                        final String? imageListString =
+                                            data['Img'];
 
-                                      // Mostrar las imágenes en un dialog
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: Text('Imágenes'),
-                                            content: Container(
-                                              width: double.maxFinite,
-                                              child: ListView.builder(
-                                                itemCount: imageUrlList.length,
-                                                itemBuilder: (context, index) {
-                                                  final url =
-                                                      imageUrlList[index]
-                                                          .trim();
-                                                  // Verificar que la URL no esté vacía y sea válida
-                                                  if (url.isNotEmpty &&
-                                                      (url.startsWith(
-                                                              'http://') ||
-                                                          url.startsWith(
-                                                              'https://'))) {
-                                                    return Padding(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          vertical: 4.0),
-                                                      child: Card(
-                                                        child: Image.network(
-                                                            url,
-                                                            fit: BoxFit.cover),
-                                                      ),
-                                                    );
-                                                  } else {
-                                                    return Padding(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          vertical: 4.0),
-                                                      child: Card(
-                                                        child: Center(
-                                                            child: Text(
-                                                                '$imageUrls')),
-                                                      ),
-                                                    );
-                                                  }
-                                                },
+                                        // Parsear la cadena a una lista dinámica
+                                        List<String> imageUrls = [];
+                                        if (imageListString != null &&
+                                            imageListString.isNotEmpty) {
+                                          try {
+                                            // Parsear la cadena JSON a una lista
+                                            imageUrls = List<String>.from(
+                                                jsonDecode(imageListString));
+                                          } catch (e) {
+                                            print(
+                                                'Error al parsear la cadena de imágenes: $e');
+                                          }
+                                        }
+
+                                        // Mostrar las imágenes en un dialog
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text('Imágenes'),
+                                              content: Container(
+                                                width: 400,
+                                                height: 500,
+                                                child: ListView.builder(
+                                                  itemCount: imageUrls.length,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    final url =
+                                                        imageUrls[index].trim();
+                                                    // Verificar que la URL no esté vacía y sea válida
+                                                    if (url.isNotEmpty &&
+                                                        (url.startsWith(
+                                                                'http://') ||
+                                                            url.startsWith(
+                                                                'https://'))) {
+                                                      return Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                vertical: 4.0),
+                                                        child: Card(
+                                                          child: FadeInImage
+                                                              .assetNetwork(
+                                                            width: 80,
+                                                            height: 150,
+                                                            placeholder:
+                                                                'assets/iph.gif', // Reemplaza con tu imagen de carga
+                                                            image: url,
+                                                            fit: BoxFit.cover,
+                                                            imageErrorBuilder:
+                                                                (context, error,
+                                                                    stackTrace) {
+                                                              return Center(
+                                                                  child: Icon(Icons
+                                                                      .error));
+                                                            },
+                                                          ),
+                                                        ),
+                                                      );
+                                                    } else {
+                                                      return Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                vertical: 4.0),
+                                                        child: Card(
+                                                          child: Center(
+                                                              child: Text(
+                                                                  'URL de imagen no válida')),
+                                                        ),
+                                                      );
+                                                    }
+                                                  },
+                                                ),
                                               ),
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                child: Text('Cerrar'),
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                  )),
+                                              actions: [
+                                                TextButton(
+                                                  child: const Text('Cerrar'),
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
                                 ],
                               );
                             }).toList(),

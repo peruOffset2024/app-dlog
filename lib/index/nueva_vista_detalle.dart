@@ -14,6 +14,7 @@ class NuevaVistaDetalle extends StatefulWidget {
   
   final String codigoSba;
   final String barcode;
+  
 
   final List<dynamic> jsonData;
   final List<dynamic> jsonDataUbi;
