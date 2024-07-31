@@ -21,160 +21,61 @@ class TablaUbicacion extends StatefulWidget {
 }
 
 class _TablaUbicacionState extends State<TablaUbicacion> {
-  final TextEditingController _ubicacionController = TextEditingController();
-  final TextEditingController _zonaController = TextEditingController();
-  final TextEditingController _standController = TextEditingController();
-  final TextEditingController _colController = TextEditingController();
-  final TextEditingController _filController = TextEditingController();
-  final TextEditingController _usuarioController = TextEditingController();
-  final TextEditingController _cantidadController = TextEditingController();
-  final TextEditingController _imgController = TextEditingController();
 
-  @override
-  void dispose() {
-    _ubicacionController.dispose();
-    _zonaController.dispose();
-    _standController.dispose();
-    _colController.dispose();
-    _filController.dispose();
-    _usuarioController.dispose();
-    _cantidadController.dispose();
-    _imgController.dispose();
-    super.dispose();
-  }
-
-  void _clearTextControllers() {
-    _ubicacionController.clear();
-    _zonaController.clear();
-    _standController.clear();
-    _colController.clear();
-    _filController.clear();
-    _cantidadController.clear();
-    _usuarioController.clear();
-    _imgController.clear();
-  }
-
-  Future<void> _actualizarData(Map<String, dynamic> ubicacion) async {
-    try {
-      final url = 'http://190.107.181.163:81/amq/flutter_ajax_edit.php';
-
-      final response = await http.put(Uri.parse(url), body: {
-        'id': ubicacion['id'] ?? '',
-        'usuario': ubicacion['usuario'] ?? '',
-        'Ubicacion': ubicacion['Ubicacion'] ?? '',
-        'Zona': ubicacion['Zona'] ?? '',
-        'Stand': ubicacion['Stand'] ?? '',
-        'col': ubicacion['col'] ?? '',
-        'fil': ubicacion['fil'] ?? '',
-        'Cantidad': ubicacion['Cantidad'] ?? '',
-        'Img': ubicacion['Img'] ?? '',
-      });
-
-      if (response.statusCode == 200) {
-        setState(() {
-          final index = widget.jsonDataUbi
-              .indexWhere((element) => element['id'] == ubicacion['id']);
-          if (index != -1) {
-            widget.jsonDataUbi[index] = ubicacion;
-            _clearTextControllers();
-          }
-        });
-      } else {
-        print(
-            'Error al actualizar la ubicación. Código de estado: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  Future<void> enviarData() async {
-    try {
-      final sbaCodigoUbi = widget.codigoSba;
-      final url = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
-
-      final response = await http.post(Uri.parse(url), body: {
-        'search': sbaCodigoUbi,
-        'ubicacion': _ubicacionController.text,
-        'zona': _zonaController.text,
-        'stand': _standController.text,
-        'col': _colController.text,
-        'fil': _filController.text,
-        'cantidad': _cantidadController.text,
-        'usuario': _usuarioController.text,
-        'img': _imgController.text,
-      });
-
-      if (response.statusCode == 200) {
-        final newData = {
-          'Ubicacion': _ubicacionController.text,
-          'Zona': _zonaController.text,
-          'Stand': _standController.text,
-          'col': _colController.text,
-          'fil': _filController.text,
-          'Cantidad': _cantidadController.text,
-          'usuario': _usuarioController.text,
-          'Img': _imgController.text,
-        };
-        setState(() {
-          widget.jsonDataUbi.add(newData);
-          _clearTextControllers();
-        });
-      } else {
-        print(
-            'Error al enviar datos a la API. Código de estado: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-  void _eliminarData(int index) {
-    setState(() {
-      widget.jsonDataUbi.removeAt(index);
+ 
+  Future<void> _eliminarDataPorId(int ids) async {
+  try {
+    final url = 'http://190.107.181.163:81/amq/flutter_ajax_delete.php';
+    final response = await http.post(Uri.parse(url), body: {
+      'id_ubi': ids.toString(),
+       'usuario': ids.toString(),
     });
-  }
+    print('id :----- $ids');
+    print('usuario:--- ${ids.toString()},');
+    if (response.statusCode == 404) {
+      setState(() {
+        widget.jsonDataUbi.removeWhere((element) => element['id'] == ids);
+        widget.jsonDataUbi.removeWhere((element) => element['usuario'] == ids);
 
-  Future<dynamic> _alertMensaje(BuildContext context, int index) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('ALERTA'),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '¿ESTAS SEGURO QUE DESEAS BORRAR?',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 20),
-            ],
-          ),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    _eliminarData(index);
-                    Navigator.pop(context);
-                  },
-                  child: const Text('SI'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('NO'),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
+      });
+    } else {
+      print('Error al eliminar la ubicación. Código de estado: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error: $e');
   }
+}
+
+Future<void> _alertMensaje(BuildContext context, int ids) {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('ALERTA'),
+        content: const Text(
+          '¿ESTÁS SEGURO QUE DESEAS BORRAR?',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              _eliminarDataPorId(ids);
+              Navigator.of(context).pop();
+            },
+            child: const Text('SI'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('NO'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -188,9 +89,11 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
       }
     }
 
+    // ignore: unused_local_variable
     double totalCantidadAlmacen = 0.0;
     widget.jsonData
         .where((data) => ![
+          
               'ALMACEN DE FALTANTES',
               'ALMACEN DE PRODUCTOS TERMINADO'
             ].contains(data['Name']))
@@ -259,6 +162,15 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                                 ),
                               ),
                             ),
+                             DataColumn(
+                              label: Text(
+                                'ID',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                             DataColumn(
                               label: Text(
                                 'ZONA',
@@ -316,14 +228,23 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                           ],
                           rows: [
                             ...widget.jsonDataUbi.map<DataRow>((data) {
-                              final index = widget.jsonDataUbi.indexOf(data);
+                              //final index = widget.jsonDataUbi.indexOf(data);
+                              final ids = int.tryParse(data['id'] ?? '') ?? 0;
                               return DataRow(
                                 cells: [
                                   DataCell(IconButton(
                                     icon: Icon(Icons.delete),
                                     onPressed: () {
-                                      _alertMensaje(context, index);
+                                     
+                                      _alertMensaje(context, ids);
                                     },
+                                  )),
+                                  DataCell(Container(
+                                    padding: EdgeInsets.all(8),
+                                    child: Text(
+                                      data['id'] ?? 'Sin ID',
+                                      style: TextStyle(fontSize: 14),
+                                    ),
                                   )),
                                   DataCell(Container(
                                     padding: EdgeInsets.all(8),
@@ -463,6 +384,13 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                             }).toList(),
                             DataRow(
                               cells: [
+                                DataCell(Container(
+                                  padding: const EdgeInsets.all(8),
+                                  child: const Text(
+                                    '',
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                )),
                                 DataCell(Container(
                                   padding: const EdgeInsets.all(8),
                                   child: const Text(
@@ -617,17 +545,5 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
     );
   }
 
-  Future<void> obtenerImagenes() async {
-    final url = 'http://190.107.181.163:81/amq/uploads/';
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      // Procesar la respuesta
-      final jsonData = jsonDecode(response.body);
-      // jsonData es un objeto que contiene la lista de imágenes
-      print(jsonData);
-    } else {
-      print('Error al obtener las imágenes: ${response.statusCode}');
-    }
-  }
+ 
 }

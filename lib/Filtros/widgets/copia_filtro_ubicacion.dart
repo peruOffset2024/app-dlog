@@ -85,12 +85,9 @@ class _VistaFiltroState extends State<VistaFiltro> {
 
   Future<void> _pickMultipleImages() async {
     final pickedFiles = await ImagePicker().pickMultiImage();
-    // ignore: unnecessary_null_comparison
-    if (pickedFiles != null) {
-      setState(() {
-        _images.addAll(pickedFiles.map((pickedFile) => File(pickedFile.path)).toList());
-      });
-    }
+    setState(() {
+      _images = pickedFiles.map((pickedFile) => File(pickedFile.path)).toList();
+    });
   }
 
   Future<void> _showImageSourceActionSheet(BuildContext context) async {
@@ -143,12 +140,12 @@ class _VistaFiltroState extends State<VistaFiltro> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const Dialog(
+        return Dialog(
           child: Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [
+              children: const [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
                 Text('Cargando...'),
@@ -289,6 +286,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                 },
               ),
             );
+            
           },
           icon: const Icon(Icons.arrow_back),
         ),
@@ -373,6 +371,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                       border: OutlineInputBorder(),
                     ),
                   ),
+                  const SizedBox(height: 20),
                   const SizedBox(height: 20),
                   Center(
                     child: GestureDetector(

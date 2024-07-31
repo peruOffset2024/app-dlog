@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 
+
 class TablaAlmacen extends StatelessWidget {
   final List<dynamic> jsonData;
+  //final void Function(double) onTotalCantidadCalculated; // Callback
+
   // ignore: use_key_in_widget_constructors
-  const TablaAlmacen(
-      {Key? key,
-      required this.jsonData,
-      required List resultados,
-      required List jsonDataUbi});
+  const TablaAlmacen({
+    Key? key,
+    required this.jsonData,
+    required List resultados,
+    required List jsonDataUbi,
+    //required this.onTotalCantidadCalculated, // Callback
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +40,11 @@ class TablaAlmacen extends StatelessWidget {
       }
       totalCantidad += stockValue;
     });
+
+    // Invoke the callback with the calculated totalQuantity
+   /* WidgetsBinding.instance.addPostFrameCallback((_) {
+      onTotalCantidadCalculated(totalCantidad);
+    });*/
 
     return Padding(
       padding: const EdgeInsets.all(10.0),
@@ -133,7 +143,7 @@ class TablaAlmacen extends StatelessWidget {
                           //////
                           ...jsonData
                               .where((data) =>
-                                  data['Name'] != 'ALMACEN DE FALTANTES')
+                                  !['ALMACEN DE FALTANTES', 'ALMACEN PROVEEDOR'].contains(data['Name']))
                               .map<DataRow>((data) {
                             return DataRow(
                               cells: [
@@ -153,7 +163,6 @@ class TablaAlmacen extends StatelessWidget {
                                 )),
                               ],
                             );
-                          // ignore: unnecessary_to_list_in_spreads
                           }).toList(),
                           if (jsonData.any((data) =>
                               almacenesConsiderados.contains(data['Name'])))
