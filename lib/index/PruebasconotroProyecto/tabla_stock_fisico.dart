@@ -72,14 +72,16 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
 
       if (response.statusCode == 200) {
         setState(() {
-          final index = widget.jsonDataUbi.indexWhere((element) => element['id'] == ubicacion['id']);
+          final index = widget.jsonDataUbi
+              .indexWhere((element) => element['id'] == ubicacion['id']);
           if (index != -1) {
             widget.jsonDataUbi[index] = ubicacion;
             _clearTextControllers();
           }
         });
       } else {
-        print('Error al actualizar la ubicación. Código de estado: ${response.statusCode}');
+        print(
+            'Error al actualizar la ubicación. Código de estado: ${response.statusCode}');
       }
     } catch (e) {
       print('Error: $e');
@@ -119,7 +121,8 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
           _clearTextControllers();
         });
       } else {
-        print('Error al enviar datos a la API. Código de estado: ${response.statusCode}');
+        print(
+            'Error al enviar datos a la API. Código de estado: ${response.statusCode}');
       }
     } catch (e) {
       print('Error: $e');
@@ -361,7 +364,69 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                                   DataCell(IconButton(
                                     icon: Icon(Icons.image),
                                     onPressed: () {
-                                      // Aquí debe ir la lógica para mostrar la imagen
+                                      // Obtener la URL de las imágenes desde jsonDataUbi
+                                      final imageUrls = data['Img'] as String?;
+                                        print(imageUrls);
+                                      // Separar las URLs por comas (o el delimitador que estés usando)
+                                      final imageUrlList =
+                                          imageUrls?.split(',') ?? [];
+
+                                      // Mostrar las imágenes en un dialog
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text('Imágenes'),
+                                            content: Container(
+                                              width: double.maxFinite,
+                                              child: ListView.builder(
+                                                itemCount: imageUrlList.length,
+                                                itemBuilder: (context, index) {
+                                                  final url =
+                                                      imageUrlList[index]
+                                                          .trim();
+                                                  // Verificar que la URL no esté vacía y sea válida
+                                                  if (url.isNotEmpty &&
+                                                      (url.startsWith(
+                                                              'http://') ||
+                                                          url.startsWith(
+                                                              'https://'))) {
+                                                    return Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 4.0),
+                                                      child: Card(
+                                                        child: Image.network(
+                                                            url,
+                                                            fit: BoxFit.cover),
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    return Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 4.0),
+                                                      child: Card(
+                                                        child: Center(
+                                                            child: Text(
+                                                                '$imageUrls')),
+                                                      ),
+                                                    );
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                child: Text('Cerrar'),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
                                     },
                                   )),
                                 ],
@@ -434,10 +499,10 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                     ),
                   )
                 : const Center(child: Text('')),
-
             SizedBox(height: 20),
             if (widget.jsonData.isNotEmpty) ...[
-              _buildDiferencias(totalCantidadAlmacen, totalCantidadUbicaciones, diferencia),
+              _buildDiferencias(
+                  totalCantidadAlmacen, totalCantidadUbicaciones, diferencia),
             ],
           ],
         ),
@@ -445,7 +510,8 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
     );
   }
 
-  Widget _buildDiferencias(double totalCantidadAlmacen, double totalCantidadUbicaciones, double diferencia) {
+  Widget _buildDiferencias(double totalCantidadAlmacen,
+      double totalCantidadUbicaciones, double diferencia) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -522,17 +588,17 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
     );
   }
 
-Future<void> obtenerImagenes() async {
-  final url = 'http://190.107.181.163:81/amq/uploads/';
-  final response = await http.get(Uri.parse(url));
+  Future<void> obtenerImagenes() async {
+    final url = 'http://190.107.181.163:81/amq/uploads/';
+    final response = await http.get(Uri.parse(url));
 
-  if (response.statusCode == 200) {
-    // Procesar la respuesta
-    final jsonData = jsonDecode(response.body);
-    // jsonData es un objeto que contiene la lista de imágenes
-    print(jsonData);
-  } else {
-    print('Error al obtener las imágenes: ${response.statusCode}');
+    if (response.statusCode == 200) {
+      // Procesar la respuesta
+      final jsonData = jsonDecode(response.body);
+      // jsonData es un objeto que contiene la lista de imágenes
+      print(jsonData);
+    } else {
+      print('Error al obtener las imágenes: ${response.statusCode}');
+    }
   }
-}
 }
