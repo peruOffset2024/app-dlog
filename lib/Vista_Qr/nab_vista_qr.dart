@@ -18,7 +18,8 @@ class _IndexPagQrState extends State<IndexPagQr> {
 
   List<dynamic> jsonData = [];
   List<dynamic> jsonDataUbi = [];
-  @override
+
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -148,6 +149,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
             },
           ),
         );
+        _codigoSbaController.clear();
       } else {
         setState(() {
           jsonDataUbi = [];
@@ -221,6 +223,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
               },
             ),
           );
+          _codigoSbaController.clear();
         } else {
           setState(() {
             jsonDataUbi = [];

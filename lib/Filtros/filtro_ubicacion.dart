@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:app_dlog/index/nueva_vista_detalle.dart';
 import 'package:app_dlog/index/vista_detalle.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +37,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
   final TextEditingController _cantidadController = TextEditingController();
   final TextEditingController _usuarioController = TextEditingController();
   List<dynamic> jsonDataUbi = [];
-
+  ValueNotifier<List<dynamic>> notifier = ValueNotifier([]);
   @override
   void initState() {
     super.initState();
@@ -126,84 +127,84 @@ class _VistaFiltroState extends State<VistaFiltro> {
   }
 
   Future<void> enviarData() async {
-    if (_selectedZona == null ||
-        _selectedStand == null ||
-        _selectedFila == null ||
-        _selectedColumna == null ||
-        _cantidadController.text.isEmpty ||
-        _usuarioController.text.isEmpty ||
-        _images.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, completa todos los campos')),
+  if (_selectedZona == null ||
+      _selectedStand == null ||
+      _selectedFila == null ||
+      _selectedColumna == null ||
+      _cantidadController.text.isEmpty ||
+      _usuarioController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Por favor, completa todos los campos')),
+    );
+    return;
+  }
+
+  // Mostrar indicador de carga
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return const Dialog(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Cargando...'),
+            ],
+          ),
+        ),
       );
+    },
+  );
+
+  try {
+    final codigoSba = widget.codSba;
+    final uploadUrl = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
+
+    var request = http.MultipartRequest('POST', Uri.parse(uploadUrl))
+      ..fields['search'] = codigoSba
+      ..fields['ubicacion'] = codigoSba
+      ..fields['zona'] = _selectedZona!
+      ..fields['stand'] = _selectedStand!
+      ..fields['col'] = _selectedColumna!
+      ..fields['fil'] = _selectedFila!
+      ..fields['cantidad'] = _cantidadController.text
+      ..fields['usuario'] = _usuarioController.text;
+
+    for (var image in _images) {
+      var file = await http.MultipartFile.fromPath('img[]', image.path);
+      request.files.add(file);
+    }
+
+    var response = await request.send();
+
+    Navigator.of(context).pop(); // Cerrar el indicador de carga
+
+    var responseBody = await response.stream.bytesToString();
+    if (responseBody.contains('<html>')) {
+      _showErrorDialog('Error del servidor: Respuesta en formato HTML');
       return;
     }
-
-    // Mostrar indicador de carga
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const Dialog(
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Cargando...'),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    try {
-      final codigoSba = widget.codSba;
-      final uploadUrl = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
-
-      var request = http.MultipartRequest('POST', Uri.parse(uploadUrl))
-        ..fields['search'] = codigoSba
-        ..fields['ubicacion'] = codigoSba
-        ..fields['zona'] = _selectedZona!
-        ..fields['stand'] = _selectedStand!
-        ..fields['col'] = _selectedColumna!
-        ..fields['fil'] = _selectedFila!
-        ..fields['cantidad'] = _cantidadController.text
-        ..fields['usuario'] = _usuarioController.text;
-
-      for (var image in _images) {
-        var file = await http.MultipartFile.fromPath('img[]', image.path);
-        request.files.add(file);
-      }
-
-      var response = await request.send();
-
-      Navigator.of(context).pop(); // Cerrar el indicador de carga
-
-      if (response.statusCode == 200) {
-        var responseBody = await response.stream.bytesToString();
-        var responseData = json.decode(responseBody);
-        if (responseData['success'] != null) {
-          setState(() {
-            _clearTextControllers();
-          });
-          _showSuccessDialog('Datos insertados correctamente');
-        } else if (responseData['error'] != null) {
-          _showErrorDialog('Error: ${responseData['error']}');
-        }
-      } else {
-        _showErrorDialog(
-            'Error al enviar datos a la API. Status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      Navigator.of(context)
-          .pop(); // Cerrar el indicador de carga en caso de error
-      _showErrorDialog('Error: $e');
+    
+    var responseData = json.decode(responseBody);
+    if (responseData['success'] != null) {
+      setState(() {
+        _clearTextControllers();
+      });
+      _showSuccessDialog('Datos insertados correctamente');
+    } else if (responseData['error'] != null) {
+      _showErrorDialog('Error: ${responseData['error']}');
     }
+  } catch (e) {
+    Navigator.of(context)
+        .pop(); // Cerrar el indicador de carga en caso de error
+    _showErrorDialog('Error: $e');
   }
+}
+
 
   void _clearTextControllers() {
     _cantidadController.clear();

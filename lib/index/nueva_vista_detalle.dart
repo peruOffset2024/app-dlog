@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:app_dlog/Filtros/filtro_ubicacion.dart';
 import 'package:app_dlog/index/Botones/widget_personalizado.dart';
 import 'package:app_dlog/index/PruebasconotroProyecto/tabla_stock_sistema.dart';
 import 'package:app_dlog/index/PruebasconotroProyecto/tabla_stock_fisico.dart';
 import 'package:app_dlog/index/navigator_boton_index.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class NuevaVistaDetalle extends StatefulWidget {
   const NuevaVistaDetalle({
@@ -26,16 +29,21 @@ class NuevaVistaDetalle extends StatefulWidget {
 
 class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
   late Future<void> _actPantalla;
   double _arriba = 0;
   double _izquierdo = 0;
   //double _totalCantidadAlmacen = 0.0;
-  List<dynamic> jsondataActu = [];
+  List<dynamic> jsondataSistema = [];
+  List<dynamic> jsondataFisico = [];
+
+
 
   @override
   void initState() {
     super.initState();
     _actPantalla = _actualizarPantalla();
+     obtenerDatosUbicacion(widget.codigoSba);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final anchoPantalla = MediaQuery.of(context).size.width;
@@ -48,6 +56,53 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
     });
   }
    
+    Future<void> obtenerDatosUbicacion(String codigoSba) async {
+    try {
+      
+      if (codigoSba.isNotEmpty) {
+        final url =
+            'http://190.107.181.163:81/amq/flutter_ajax.php?search=$codigoSba';
+        final response = await http.get(Uri.parse(url));
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          setState(() {
+            jsondataSistema = data is List<dynamic> ? data : [];
+          });
+        } else {
+          setState(() {
+            jsondataSistema = [];
+          });
+          print('Error al consumir el API');
+        }
+      } else {
+        print('Ingrese un codigo SBA valido');
+      }
+
+      // codigo para consumir el api de la url de Ubicaciones
+
+      final UrlUbicaciones =
+          'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$codigoSba';
+      final responseUbicaciones = await http.get(Uri.parse(UrlUbicaciones));
+      if (responseUbicaciones.statusCode == 200) {
+        final dataUbi = jsonDecode(responseUbicaciones.body);
+        setState(() {
+          jsondataFisico = dataUbi is List<dynamic> ? dataUbi : [];
+        });
+        
+      } else {
+        setState(() {
+          jsondataFisico = [];
+        });
+        print('Error al obtener datos de la ubicacion');
+      }
+    } catch (e) {
+      setState(() {
+        jsondataFisico = [];
+        jsondataFisico = [];
+      });
+      print('Error: $e');
+    }
+  }
    
   
 
@@ -87,23 +142,11 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
     );
   }
 
-  /*void _handleTotalCantidadCalculated(double totalCantidad) {
-    setState(() {
-      _totalCantidadAlmacen = totalCantidad;
-    });
-  }*/
+
 
   @override
   Widget build(BuildContext context) {
-   /* double totalCantidadUbicaciones = 0.0;
-    for (var data in widget.jsonDataUbi) {
-      if (data['Cantidad'] != null && data['Cantidad'] is num) {
-        totalCantidadUbicaciones += data['Cantidad'];
-      } else if (data['Cantidad'] != null && data['Cantidad'] is String) {
-        totalCantidadUbicaciones += double.tryParse(data['Cantidad']) ?? 0.0;
-      }
-    }
-    double diferencia = _totalCantidadAlmacen - totalCantidadUbicaciones;*/
+  
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
@@ -132,13 +175,12 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
         ),
       ),
       body: Stack(
-        children: [
+        children: [  //////// aquii
           RefreshIndicator(
             onRefresh: _refrescarPantalla,
             child: FutureBuilder(
                 future:  _actPantalla,
                 builder: (context, snapshot) {
-                  
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
@@ -155,7 +197,7 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
                               jsonData: widget.jsonData,
                               resultados: [],
                               jsonDataUbi: widget.jsonDataUbi,
-                              //onTotalCantidadCalculated: _handleTotalCantidadCalculated,
+                            
                             ),
                             TablaUbicacion(
                               jsonData: widget.jsonData,
@@ -197,90 +239,9 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
               child: CuerpoBoton(_navegarSiguientePag),
             ),
           )
-          /*Positioned(
-            bottom: _izquierdo -120, // Ajusta la distancia del bottom para que no se superponga
-            left: _arriba - 710, // Ajusta la distancia del left para centrar el Container alrededor del FloatingActionButton
-            child: Container(
-              height: 100,
-              width: 780,
-              color: Colors.white,
-              child: Center(
-                child: _buildDiferencias(
-                  _totalCantidadAlmacen,
-                  totalCantidadUbicaciones,
-                  diferencia,
-                ),
-              ),
-            ),
-          ),*/
         ],
       ),
     );
   }
 
-  /*Widget _buildDiferencias(double totalCantidadAlmacen, double totalCantidadUbicaciones, double diferencia) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              width: 160,
-              height: 80,
-              child: Center(
-                child: Text(
-                  ' Total stock sistema:  \n $totalCantidadAlmacen',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.yellow,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              width: 160,
-              height: 80,
-              child: Center(
-                child: Text(
-                  ' Total stock fisico: \n $totalCantidadUbicaciones',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              width: 160,
-              height: 80,
-              child: Center(
-                child: Text(
-                  'Diferencia : \n $diferencia',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-  */
 }

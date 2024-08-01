@@ -19,7 +19,7 @@ class TablaAlmacen extends StatelessWidget {
     // Lista de almacenes que deben considerarse para la suma
     const almacenesConsiderados = [
       'ALMACEN DE RESERVA',
-      'ALMACEN HUACHIPA ',
+      'ALMACEN HUACHIPA',
       'ALMACEN CUARENTENA',
       'ALMACEN DE REPUESTOS (2018)'
     ];

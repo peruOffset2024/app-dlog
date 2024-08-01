@@ -29,7 +29,6 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
 
       final response = await http.get(Uri.parse(url));
 
-      // Verificar si la respuesta es exitosa
       if (response.statusCode == 200) {
         setState(() {
           widget.jsonDataUbi.removeWhere((element) => element['id'] == ids);
@@ -85,12 +84,13 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
       }
     }
 
-    // ignore: unused_local_variable
     double totalCantidadAlmacen = 0.0;
     widget.jsonData
         .where((data) => ![
+              
               'ALMACEN DE FALTANTES',
-              'ALMACEN DE PRODUCTOS TERMINADO'
+              'ALMACEN DE PRODUCTOS TERMINADO',
+              'ALMACEN PROVEEDOR',
             ].contains(data['Name']))
         .forEach((data) {
       double stockValue = 0.0;
@@ -114,10 +114,10 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.jsonData.isNotEmpty) ...[
-              Container(
+              const SizedBox(
                 width: 600,
                 height: 60,
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
@@ -224,7 +224,12 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                           rows: [
                             ...widget.jsonDataUbi.map<DataRow>((data) {
                               final ids = int.tryParse(data['id'] ?? '') ?? 0;
-                              final String nombre = 'Ricardo';
+                              const String nombre = 'Ricardo';
+
+                              final imageUrls = data['Img'] != null
+                                  ? List<String>.from(
+                                      jsonDecode(data['Img'] as String))
+                                  : [];
 
                               return DataRow(
                                 cells: [
@@ -272,44 +277,21 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                                   DataCell(Container(
                                     padding: EdgeInsets.all(8),
                                     child: Text(
-                                      data['Cantidad']?.toString() ??
-                                          'Sin cantidad',
+                                      data['Cantidad']?.toString() ?? 'Sin cantidad',
                                       style: TextStyle(fontSize: 14),
                                     ),
                                   )),
                                   DataCell(
-                                    data['Img'] != null &&
-                                            data['Img']!.isNotEmpty
+                                    imageUrls.isNotEmpty
                                         ? IconButton(
                                             icon: Icon(Icons.image),
                                             onPressed: () {
-                                              // Obtener la cadena que contiene las URLs de las imágenes desde jsonDataUbi
-                                              final String? imageListString =
-                                                  data['Img'];
-
-                                              // Parsear la cadena a una lista dinámica
-                                              List<String> imageUrls = [];
-                                              if (imageListString != null &&
-                                                  imageListString.isNotEmpty) {
-                                                try {
-                                                  // Parsear la cadena JSON a una lista
-                                                  imageUrls = List<String>.from(
-                                                      jsonDecode(
-                                                          imageListString));
-                                                } catch (e) {
-                                                  print(
-                                                      'Error al parsear la cadena de imágenes: $e');
-                                                }
-                                              }
-
-                                              // Mostrar las imágenes en un dialog
                                               showDialog(
                                                 context: context,
                                                 builder:
                                                     (BuildContext context) {
                                                   return AlertDialog(
-                                                    title:
-                                                        const Text('Imágenes'),
+                                                    title: const Text('Imágenes'),
                                                     content: Container(
                                                       width: 400,
                                                       height: 500,
@@ -321,7 +303,6 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                                                           final url =
                                                               imageUrls[index]
                                                                   .trim();
-                                                          // Verificar que la URL no esté vacía y sea válida
                                                           if (url.isNotEmpty &&
                                                               (url.startsWith(
                                                                       'http://') ||
@@ -416,21 +397,21 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                                 )),
                                 DataCell(Container(
                                   padding: EdgeInsets.all(8),
-                                  child: Text(
+                                  child: const Text(
                                     '',
                                     style: TextStyle(fontSize: 14),
                                   ),
                                 )),
                                 DataCell(Container(
                                   padding: EdgeInsets.all(8),
-                                  child: Text(
+                                  child: const Text(
                                     '',
                                     style: TextStyle(fontSize: 14),
                                   ),
                                 )),
                                 DataCell(Container(
                                   padding: EdgeInsets.all(8),
-                                  child: Text(
+                                  child: const Text(
                                     '',
                                     style: TextStyle(fontSize: 14),
                                   ),
@@ -439,7 +420,7 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                                   padding: EdgeInsets.all(8),
                                   child: Text(
                                     totalCantidadUbicaciones.toString(),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                       color: Colors.blue,
@@ -448,7 +429,7 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                                 )),
                                 DataCell(Container(
                                   padding: EdgeInsets.all(8),
-                                  child: Text(
+                                  child: const Text(
                                     '',
                                     style: TextStyle(fontSize: 14),
                                   ),
@@ -499,7 +480,7 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                     height: 60,
                     child: Center(
                       child: Text(
-                        ' Total stock sistema:  \n $totalCantidadAlmacen', // text,
+                        ' Total stock sistema:  \n $totalCantidadAlmacen',
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -516,7 +497,7 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                     height: 60,
                     child: Center(
                       child: Text(
-                        ' Total stock fisico: \n $totalCantidadUbicaciones', // text,
+                        ' Total stock fisico: \n $totalCantidadUbicaciones',
                         style: const TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -533,7 +514,7 @@ class _TablaUbicacionState extends State<TablaUbicacion> {
                     height: 60,
                     child: Center(
                       child: Text(
-                        'Diferencia : \n $diferencia', // text,
+                        'Diferencia : \n $diferencia',
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
