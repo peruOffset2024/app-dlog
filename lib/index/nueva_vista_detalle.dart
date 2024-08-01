@@ -5,7 +5,6 @@ import 'package:app_dlog/index/PruebasconotroProyecto/tabla_stock_fisico.dart';
 import 'package:app_dlog/index/navigator_boton_index.dart';
 import 'package:flutter/material.dart';
 
-
 class NuevaVistaDetalle extends StatefulWidget {
   const NuevaVistaDetalle({
     super.key,
@@ -65,11 +64,6 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
       const SnackBar(content: Text('Datos actualizados')),
     );
   }
-
- 
-
-
-
 
   void _navegarSiguientePag() {
     final codigoSba3 = widget.codigoSba;
@@ -142,8 +136,9 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
           RefreshIndicator(
             onRefresh: _refrescarPantalla,
             child: FutureBuilder(
-                future: _actPantalla,
+                future:  _actPantalla,
                 builder: (context, snapshot) {
+                  
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {

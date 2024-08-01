@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:app_dlog/index/nueva_vista_detalle.dart';
 import 'package:app_dlog/index/vista_detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -223,24 +224,43 @@ class _VistaFiltroState extends State<VistaFiltro> {
   }
 
   void _showSuccessDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Éxito'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Éxito'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.pop(context); // Cierra el diálogo
+              Navigator.pop(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const NuevaVistaDetalle(jsonData: [], jsonDataUbi: [], codigoSba: '', barcode: '',),
+                transitionDuration: const Duration(milliseconds: 500),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      end: Offset.zero,
+                      begin: const Offset(-1.0, 0.0),
+                    ).animate(animation),
+                    child: child,
+                  );
+                },
+              ),
+            );
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   void _showErrorDialog(String message) {
     showDialog(

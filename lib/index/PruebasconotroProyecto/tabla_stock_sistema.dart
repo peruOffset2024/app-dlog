@@ -28,7 +28,7 @@ class TablaAlmacen extends StatelessWidget {
     double totalCantidad = 0.0;
 
     jsonData
-        .where((data) => !['ALMACEN DE FALTANTES', ''].contains(data['Name']))
+        .where((data) => !['ALMACEN DE FALTANTES', 'ALMACEN PROVEEDOR'].contains(data['Name']))
         .forEach((data) {
       double stockValue = 0.0;
       if (data['Stock'] != null) {

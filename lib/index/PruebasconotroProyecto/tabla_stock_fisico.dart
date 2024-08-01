@@ -21,61 +21,57 @@ class TablaUbicacion extends StatefulWidget {
 }
 
 class _TablaUbicacionState extends State<TablaUbicacion> {
+  String nombre = 'uuu';
 
- 
-  Future<void> _eliminarDataPorId(int ids) async {
-  try {
-    final url = 'http://190.107.181.163:81/amq/flutter_ajax_delete.php';
-    final response = await http.post(Uri.parse(url), body: {
-      'id_ubi': ids.toString(),
-       'usuario': ids.toString(),
-    });
-    print('id :----- $ids');
-    print('usuario:--- ${ids.toString()},');
-    if (response.statusCode == 404) {
-      setState(() {
-        widget.jsonDataUbi.removeWhere((element) => element['id'] == ids);
-        widget.jsonDataUbi.removeWhere((element) => element['usuario'] == ids);
+  Future<void> _eliminarDataPorId(int ids, String nombre) async {
+    try {
+      final url = 'http://190.107.181.163:81/amq/flutter_ajax_ubi_delete.php?id_ubi=$ids&usuario=$nombre';
 
-      });
-    } else {
-      print('Error al eliminar la ubicación. Código de estado: ${response.statusCode}');
+      final response = await http.get(Uri.parse(url));
+
+      // Verificar si la respuesta es exitosa
+      if (response.statusCode == 200) {
+        setState(() {
+          widget.jsonDataUbi.removeWhere((element) => element['id'] == ids);
+        });
+        print('Estado actualizado correctamente');
+      } else {
+        print('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
     }
-  } catch (e) {
-    print('Error: $e');
   }
-}
 
-Future<void> _alertMensaje(BuildContext context, int ids) {
-  return showDialog<void>(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('ALERTA'),
-        content: const Text(
-          '¿ESTÁS SEGURO QUE DESEAS BORRAR?',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              _eliminarDataPorId(ids);
-              Navigator.of(context).pop();
-            },
-            child: const Text('SI'),
+  Future<void> _alertMensaje(BuildContext context, int ids, String nombre) {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('ALERTA'),
+          content: const Text(
+            '¿ESTÁS SEGURO QUE DESEAS BORRAR?',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('NO'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                _eliminarDataPorId(ids, nombre);
+                Navigator.of(context).pop();
+              },
+              child: const Text('SI'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('NO'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +89,6 @@ Future<void> _alertMensaje(BuildContext context, int ids) {
     double totalCantidadAlmacen = 0.0;
     widget.jsonData
         .where((data) => ![
-          
               'ALMACEN DE FALTANTES',
               'ALMACEN DE PRODUCTOS TERMINADO'
             ].contains(data['Name']))
@@ -162,7 +157,7 @@ Future<void> _alertMensaje(BuildContext context, int ids) {
                                 ),
                               ),
                             ),
-                             DataColumn(
+                            DataColumn(
                               label: Text(
                                 'ID',
                                 style: TextStyle(
@@ -228,15 +223,15 @@ Future<void> _alertMensaje(BuildContext context, int ids) {
                           ],
                           rows: [
                             ...widget.jsonDataUbi.map<DataRow>((data) {
-                              //final index = widget.jsonDataUbi.indexOf(data);
                               final ids = int.tryParse(data['id'] ?? '') ?? 0;
+                              final String nombre = 'Ricardo';
+
                               return DataRow(
                                 cells: [
                                   DataCell(IconButton(
                                     icon: Icon(Icons.delete),
                                     onPressed: () {
-                                     
-                                      _alertMensaje(context, ids);
+                                      _alertMensaje(context, ids, nombre);
                                     },
                                   )),
                                   DataCell(Container(
@@ -283,101 +278,111 @@ Future<void> _alertMensaje(BuildContext context, int ids) {
                                     ),
                                   )),
                                   DataCell(
-                                    IconButton(
-                                      icon: Icon(Icons.image),
-                                      onPressed: () {
-                                        // Obtener la cadena que contiene las URLs de las imágenes desde jsonDataUbi
-                                        final String? imageListString =
-                                            data['Img'];
+                                    data['Img'] != null &&
+                                            data['Img']!.isNotEmpty
+                                        ? IconButton(
+                                            icon: Icon(Icons.image),
+                                            onPressed: () {
+                                              // Obtener la cadena que contiene las URLs de las imágenes desde jsonDataUbi
+                                              final String? imageListString =
+                                                  data['Img'];
 
-                                        // Parsear la cadena a una lista dinámica
-                                        List<String> imageUrls = [];
-                                        if (imageListString != null &&
-                                            imageListString.isNotEmpty) {
-                                          try {
-                                            // Parsear la cadena JSON a una lista
-                                            imageUrls = List<String>.from(
-                                                jsonDecode(imageListString));
-                                          } catch (e) {
-                                            print(
-                                                'Error al parsear la cadena de imágenes: $e');
-                                          }
-                                        }
+                                              // Parsear la cadena a una lista dinámica
+                                              List<String> imageUrls = [];
+                                              if (imageListString != null &&
+                                                  imageListString.isNotEmpty) {
+                                                try {
+                                                  // Parsear la cadena JSON a una lista
+                                                  imageUrls = List<String>.from(
+                                                      jsonDecode(
+                                                          imageListString));
+                                                } catch (e) {
+                                                  print(
+                                                      'Error al parsear la cadena de imágenes: $e');
+                                                }
+                                              }
 
-                                        // Mostrar las imágenes en un dialog
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: const Text('Imágenes'),
-                                              content: Container(
-                                                width: 400,
-                                                height: 500,
-                                                child: ListView.builder(
-                                                  itemCount: imageUrls.length,
-                                                  itemBuilder:
-                                                      (context, index) {
-                                                    final url =
-                                                        imageUrls[index].trim();
-                                                    // Verificar que la URL no esté vacía y sea válida
-                                                    if (url.isNotEmpty &&
-                                                        (url.startsWith(
-                                                                'http://') ||
-                                                            url.startsWith(
-                                                                'https://'))) {
-                                                      return Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                vertical: 4.0),
-                                                        child: Card(
-                                                          child: FadeInImage
-                                                              .assetNetwork(
-                                                            width: 80,
-                                                            height: 150,
-                                                            placeholder:
-                                                                'assets/iph.gif', // Reemplaza con tu imagen de carga
-                                                            image: url,
-                                                            fit: BoxFit.cover,
-                                                            imageErrorBuilder:
-                                                                (context, error,
-                                                                    stackTrace) {
-                                                              return Center(
-                                                                  child: Icon(Icons
-                                                                      .error));
-                                                            },
-                                                          ),
-                                                        ),
-                                                      );
-                                                    } else {
-                                                      return Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                vertical: 4.0),
-                                                        child: Card(
-                                                          child: Center(
-                                                              child: Text(
-                                                                  'URL de imagen no válida')),
-                                                        ),
-                                                      );
-                                                    }
-                                                  },
-                                                ),
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  child: const Text('Cerrar'),
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      },
-                                    ),
+                                              // Mostrar las imágenes en un dialog
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title:
+                                                        const Text('Imágenes'),
+                                                    content: Container(
+                                                      width: 400,
+                                                      height: 500,
+                                                      child: ListView.builder(
+                                                        itemCount:
+                                                            imageUrls.length,
+                                                        itemBuilder:
+                                                            (context, index) {
+                                                          final url =
+                                                              imageUrls[index]
+                                                                  .trim();
+                                                          // Verificar que la URL no esté vacía y sea válida
+                                                          if (url.isNotEmpty &&
+                                                              (url.startsWith(
+                                                                      'http://') ||
+                                                                  url.startsWith(
+                                                                      'https://'))) {
+                                                            return Padding(
+                                                              padding: const EdgeInsets
+                                                                  .symmetric(
+                                                                      vertical:
+                                                                          4.0),
+                                                              child: Card(
+                                                                child: FadeInImage
+                                                                    .assetNetwork(
+                                                                  width: 80,
+                                                                  height: 150,
+                                                                  placeholder:
+                                                                      'assets/iph.gif', // Reemplaza con tu imagen de carga
+                                                                  image: url,
+                                                                  fit: BoxFit.cover,
+                                                                  imageErrorBuilder:
+                                                                      (context, error,
+                                                                          stackTrace) {
+                                                                    return Center(
+                                                                        child: Icon(Icons
+                                                                            .error));
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            );
+                                                          } else {
+                                                            return Padding(
+                                                              padding: const EdgeInsets
+                                                                  .symmetric(
+                                                                      vertical:
+                                                                          4.0),
+                                                              child: Card(
+                                                                child: Center(
+                                                                    child: Text(
+                                                                        'URL de imagen no válida')),
+                                                              ),
+                                                            );
+                                                          }
+                                                        },
+                                                      ),
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        child:
+                                                            const Text('Cerrar'),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          )
+                                        : Container(), // Mostrar vacío si no hay imágenes
                                   ),
                                 ],
                               );
@@ -544,6 +549,4 @@ Future<void> _alertMensaje(BuildContext context, int ids) {
       ],
     );
   }
-
- 
 }
