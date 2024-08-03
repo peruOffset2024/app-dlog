@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 
-class TablaAlmacen extends StatelessWidget {
+class TablaAlmacen extends StatefulWidget {
   final List<dynamic> jsonData;
   //final void Function(double) onTotalCantidadCalculated; // Callback
 
@@ -15,6 +15,11 @@ class TablaAlmacen extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<TablaAlmacen> createState() => _TablaAlmacenState();
+}
+
+class _TablaAlmacenState extends State<TablaAlmacen> {
+  @override
   Widget build(BuildContext context) {
     // Lista de almacenes que deben considerarse para la suma
     const almacenesConsiderados = [
@@ -27,7 +32,7 @@ class TablaAlmacen extends StatelessWidget {
     // Calcula el total de cantidades de los almacenes específicos
     double totalCantidad = 0.0;
 
-    jsonData
+    widget.jsonData
         .where((data) => !['ALMACEN DE FALTANTES', 'ALMACEN PROVEEDOR'].contains(data['Name']))
         .forEach((data) {
       double stockValue = 0.0;
@@ -51,7 +56,7 @@ class TablaAlmacen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (jsonData.isNotEmpty) ...[
+          if (widget.jsonData.isNotEmpty) ...[
             Container(
               width: 700,
               padding: const EdgeInsets.all(10),
@@ -63,7 +68,7 @@ class TablaAlmacen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    ' DETALLE ITEM : ${jsonData.first['ItemCode'] ?? 'N/A'}',
+                    ' DETALLE ITEM : ${widget.jsonData.first['ItemCode'] ?? 'N/A'}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -72,7 +77,7 @@ class TablaAlmacen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    jsonData.first['itemdescripcion'] ??
+                    widget.jsonData.first['itemdescripcion'] ??
                         'Descripción no disponible',
                     style: const TextStyle(
                       fontSize: 18,
@@ -85,7 +90,7 @@ class TablaAlmacen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
           ],
-          if (jsonData.isNotEmpty) ...[
+          if (widget.jsonData.isNotEmpty) ...[
               // ignore: sized_box_for_whitespace
               Container(
                 width: 600,
@@ -104,7 +109,7 @@ class TablaAlmacen extends StatelessWidget {
               ),
               const SizedBox(height: 10,)
             ],
-          jsonData.isNotEmpty
+          widget.jsonData.isNotEmpty
               // ignore: sized_box_for_whitespace
               ? Container(
                   width: 700,
@@ -141,7 +146,7 @@ class TablaAlmacen extends StatelessWidget {
                         ],
                         rows: [
                           //////
-                          ...jsonData
+                          ...widget.jsonData
                               .where((data) =>
                                   !['ALMACEN DE FALTANTES', 'ALMACEN PROVEEDOR'].contains(data['Name']))
                               .map<DataRow>((data) {
@@ -164,7 +169,7 @@ class TablaAlmacen extends StatelessWidget {
                               ],
                             );
                           }).toList(),
-                          if (jsonData.any((data) =>
+                          if (widget.jsonData.any((data) =>
                               almacenesConsiderados.contains(data['Name'])))
                             DataRow(
                               cells: [

@@ -7,7 +7,7 @@ void main() {
   
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => UbicacionModel(),),
+      ChangeNotifierProvider(create: (_) => AppProvider(),),
     ],
     
     child: const MyApp()));

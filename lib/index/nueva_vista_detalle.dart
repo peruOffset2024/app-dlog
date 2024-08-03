@@ -5,8 +5,10 @@ import 'package:app_dlog/index/Botones/widget_personalizado.dart';
 import 'package:app_dlog/index/PruebasconotroProyecto/tabla_stock_sistema.dart';
 import 'package:app_dlog/index/PruebasconotroProyecto/tabla_stock_fisico.dart';
 import 'package:app_dlog/index/navigator_boton_index.dart';
+import 'package:app_dlog/index/providers/appprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class NuevaVistaDetalle extends StatefulWidget {
   const NuevaVistaDetalle({
@@ -19,7 +21,6 @@ class NuevaVistaDetalle extends StatefulWidget {
 
   final String codigoSba;
   final String barcode;
-
   final List<dynamic> jsonData;
   final List<dynamic> jsonDataUbi;
   
@@ -33,18 +34,15 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
   late Future<void> _actPantalla;
   double _arriba = 0;
   double _izquierdo = 0;
-  //double _totalCantidadAlmacen = 0.0;
-  List<dynamic> jsondataSistema = [];
-  List<dynamic> jsondataFisico = [];
-
-
+  List<dynamic> jsonData2 = [];
+  List<dynamic> jsonDataUbic2 = [];
 
   @override
   void initState() {
     super.initState();
     _actPantalla = _actualizarPantalla();
-     obtenerDatosUbicacion(widget.codigoSba);
-
+    Provider.of<AppProvider>(context, listen: false).fetchData(widget.codigoSba);
+    Provider.of<AppProvider>(context, listen: false).fetchDataUbi(widget.codigoSba);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final anchoPantalla = MediaQuery.of(context).size.width;
       final alturaPantalla = MediaQuery.of(context).size.height;
@@ -56,64 +54,15 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
     });
   }
    
-    Future<void> obtenerDatosUbicacion(String codigoSba) async {
-    try {
-      
-      if (codigoSba.isNotEmpty) {
-        final url =
-            'http://190.107.181.163:81/amq/flutter_ajax.php?search=$codigoSba';
-        final response = await http.get(Uri.parse(url));
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          setState(() {
-            jsondataSistema = data is List<dynamic> ? data : [];
-          });
-        } else {
-          setState(() {
-            jsondataSistema = [];
-          });
-          print('Error al consumir el API');
-        }
-      } else {
-        print('Ingrese un codigo SBA valido');
-      }
-
-      // codigo para consumir el api de la url de Ubicaciones
-
-      final UrlUbicaciones =
-          'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$codigoSba';
-      final responseUbicaciones = await http.get(Uri.parse(UrlUbicaciones));
-      if (responseUbicaciones.statusCode == 200) {
-        final dataUbi = jsonDecode(responseUbicaciones.body);
-        setState(() {
-          jsondataFisico = dataUbi is List<dynamic> ? dataUbi : [];
-        });
-        
-      } else {
-        setState(() {
-          jsondataFisico = [];
-        });
-        print('Error al obtener datos de la ubicacion');
-      }
-    } catch (e) {
-      setState(() {
-        jsondataFisico = [];
-        jsondataFisico = [];
-      });
-      print('Error: $e');
-    }
-  }
-   
-  
-
   Future<void> _actualizarPantalla() async {
+    // Aquí deberías realizar la lógica para actualizar los datos
+    
     await Future.delayed(const Duration(milliseconds: 200));
   }
 
   Future<void> _refrescarPantalla() async {
     setState(() {
       _actPantalla = _actualizarPantalla();
-      
     });
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Datos actualizados')),
@@ -122,11 +71,11 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
 
   void _navegarSiguientePag() {
     final codigoSba3 = widget.codigoSba;
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            VistaFiltro(barcode: widget.barcode, codSba: codigoSba3, jsonData: widget.jsonData, ),
+            VistaFiltro(barcode: widget.barcode, codSba: codigoSba3, jsonData: widget.jsonData, jsonDataUbi: widget.jsonDataUbi, ),
         transitionDuration: const Duration(milliseconds: 500),
         transitionsBuilder:
             (context, animation, secondaryAnimation, child) {
@@ -142,11 +91,9 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-  
+    final appProvider = Provider.of<AppProvider>(context);
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
@@ -175,14 +122,14 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
         ),
       ),
       body: Stack(
-        children: [  //////// aquii
+        children: [
           RefreshIndicator(
             onRefresh: _refrescarPantalla,
             child: FutureBuilder(
                 future:  _actPantalla,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(
                         child: Text("Error: ${snapshot.error.toString()} "));
@@ -191,20 +138,19 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
                       child: SizedBox(
                         width: 700,
                         child: ListView(
-                          padding: EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(16),
                           children: [
                             TablaAlmacen(
                               jsonData: widget.jsonData,
                               resultados: [],
                               jsonDataUbi: widget.jsonDataUbi,
-                            
                             ),
                             TablaUbicacion(
-                              jsonData: widget.jsonData,
-                              jsonDataUbi: widget.jsonDataUbi,
-                              codigoSba: widget.codigoSba,
-                              resultados: [],
+                              jsonData: appProvider.jsonData,
+                              jsonDataUbi: appProvider.jsonDataUbi,
+                             
                             ),
+                            
                           ],
                         ),
                       ),
@@ -244,4 +190,30 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
     );
   }
 
+  Future<void> _dataRefrescar() async {
+    
+    try {
+      final codigosba2 = widget.codigoSba;
+      final UrlUbicaciones =
+          'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$codigosba2';
+      final responseUbicaciones = await http.get(Uri.parse(UrlUbicaciones));
+      if (responseUbicaciones.statusCode == 200) {
+        final dataUbi = jsonDecode(responseUbicaciones.body);
+        setState(() {
+          jsonDataUbic2  = dataUbi is List<dynamic> ? dataUbi : [];
+        });
+      } else {
+        setState(() {
+          jsonDataUbic2  = [];
+        });
+        print('Error al obtener datos de la ubicacion');
+      }
+    } catch (e) {
+      setState(() {
+        jsonDataUbic2  = [];
+    
+      });
+      print('Error: $e');
+    }
+  }
 }

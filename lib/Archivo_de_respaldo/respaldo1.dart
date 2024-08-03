@@ -1,13 +1,9 @@
-
 import 'dart:convert';
-
-import 'package:app_dlog/index/providers/appprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 
-
-class TablaUbicacion extends StatelessWidget {
+class TablaUbicacion extends StatefulWidget {
+  final String codigoSba;
   final List<dynamic> jsonData;
   final List<dynamic> jsonDataUbi;
 
@@ -15,15 +11,27 @@ class TablaUbicacion extends StatelessWidget {
     Key? key,
     required this.jsonData,
     required this.jsonDataUbi,
+    required this.codigoSba,
+    required List resultados,
   }) : super(key: key);
 
-  Future<void> _eliminarDataPorId(BuildContext context, int ids, String nombre) async {
+  @override
+  State<TablaUbicacion> createState() => _TablaUbicacionState();
+}
+
+class _TablaUbicacionState extends State<TablaUbicacion> {
+  String nombre = 'uuu';
+
+  Future<void> _eliminarDataPorId(int ids, String nombre) async {
     try {
-      final url = 'http://190.107.181.163:81/amq/flutter_ajax_ubi_delete.php?id_ubi=$ids&usuario=$nombre';
+      final url =
+          'http://190.107.181.163:81/amq/flutter_ajax_ubi_delete.php?id_ubi=$ids&usuario=$nombre';
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        Provider.of<AppProvider>(context, listen: false).removeDataById(ids);
+        setState(() {
+          widget.jsonDataUbi.removeWhere((element) => element['id'] == ids);
+        });
         print('Estado actualizado correctamente');
       } else {
         print('Error: ${response.statusCode}');
@@ -46,7 +54,7 @@ class TablaUbicacion extends StatelessWidget {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                _eliminarDataPorId(context, ids, nombre);
+                _eliminarDataPorId(ids, nombre);
                 Navigator.of(context).pop();
               },
               child: const Text('SI'),
@@ -67,7 +75,7 @@ class TablaUbicacion extends StatelessWidget {
   Widget build(BuildContext context) {
     double totalCantidadUbicaciones = 0.0;
 
-    for (var data in jsonDataUbi) {
+    for (var data in widget.jsonDataUbi) {
       if (data['Cantidad'] != null && data['Cantidad'] is num) {
         totalCantidadUbicaciones += data['Cantidad'];
       } else if (data['Cantidad'] != null && data['Cantidad'] is String) {
@@ -76,7 +84,7 @@ class TablaUbicacion extends StatelessWidget {
     }
 
     double totalCantidadAlmacen = 0.0;
-    jsonData
+    widget.jsonData
         .where((data) => ![
               'ALMACEN DE FALTANTES',
               'ALMACEN DE PRODUCTOS TERMINADO',
@@ -96,7 +104,7 @@ class TablaUbicacion extends StatelessWidget {
 
     // ignore: unused_local_variable
     double diferencia = totalCantidadAlmacen - totalCantidadUbicaciones;
-    final appProvider = Provider.of<AppProvider>(context);
+
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Padding(
@@ -104,7 +112,7 @@ class TablaUbicacion extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (appProvider.jsonData.isNotEmpty) ...[
+            if (widget.jsonData.isNotEmpty) ...[
               const SizedBox(
                 width: 600,
                 height: 60,
@@ -113,7 +121,8 @@ class TablaUbicacion extends StatelessWidget {
                   children: [
                     Text(
                       'STOCK FISICO',
-                      style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(width: 100),
                   ],
@@ -121,7 +130,7 @@ class TablaUbicacion extends StatelessWidget {
               ),
               SizedBox(height: 10)
             ],
-            appProvider.jsonDataUbi.isNotEmpty
+            widget.jsonDataUbi.isNotEmpty
                 ? Container(
                     width: 700,
                     child: Card(
@@ -212,7 +221,7 @@ class TablaUbicacion extends StatelessWidget {
                             ),
                           ],
                           rows: [
-                            ...appProvider.jsonDataUbi.map<DataRow>((data) {
+                            ...widget.jsonDataUbi.map<DataRow>((data) {
                               final ids = int.tryParse(data['id'] ?? '') ?? 0;
                               const String nombre = 'Ricardo';
 
@@ -437,7 +446,8 @@ class TablaUbicacion extends StatelessWidget {
                       ),
                     ),
                   )
-                : const SizedBox(),
+                : const Center(child: Text('')),
+            SizedBox(height: 20),
           ],
         ),
       ),

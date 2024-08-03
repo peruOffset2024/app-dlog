@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:app_dlog/index/nueva_vista_detalle.dart';
+import 'package:app_dlog/index/nav_nueva_vista_detalle.dart';
 import 'package:app_dlog/index/vista_detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,10 +13,12 @@ class VistaFiltro extends StatefulWidget {
     required this.barcode,
     required this.codSba,
     required this.jsonData,
+    required this.jsonDataUbi,
   });
   final String barcode;
   final String codSba;
   final List<dynamic> jsonData;
+  final List<dynamic> jsonDataUbi;
 
   @override
   State<VistaFiltro> createState() => _VistaFiltroState();
@@ -38,43 +39,6 @@ class _VistaFiltroState extends State<VistaFiltro> {
   final TextEditingController _usuarioController = TextEditingController();
   List<dynamic> jsonDataUbi = [];
   ValueNotifier<List<dynamic>> notifier = ValueNotifier([]);
-  @override
-  void initState() {
-    super.initState();
-    obtenerDatosUbicacion(widget.codSba);
-  }
-
-  Future<void> obtenerDatosUbicacion(String codSba) async {
-    try {
-      if (codSba.isNotEmpty) {
-        final urlUbi =
-            'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$codSba';
-        final response = await http.get(Uri.parse(urlUbi));
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          setState(() {
-            jsonDataUbi = data is List<dynamic> ? data : [];
-          });
-        } else {
-          setState(() {
-            jsonDataUbi = [];
-          });
-          print(
-              'Error al consumir el API. Código de estado: ${response.statusCode}');
-        }
-      } else {
-        setState(() {
-          jsonDataUbi = [];
-        });
-        print('Código SBA vacío');
-      }
-    } catch (e) {
-      setState(() {
-        jsonDataUbi = [];
-      });
-      print('Error: $e');
-    }
-  }
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
@@ -90,7 +54,8 @@ class _VistaFiltroState extends State<VistaFiltro> {
     // ignore: unnecessary_null_comparison
     if (pickedFiles != null) {
       setState(() {
-        _images.addAll(pickedFiles.map((pickedFile) => File(pickedFile.path)).toList());
+        _images.addAll(
+            pickedFiles.map((pickedFile) => File(pickedFile.path)).toList());
       });
     }
   }
@@ -127,84 +92,83 @@ class _VistaFiltroState extends State<VistaFiltro> {
   }
 
   Future<void> enviarData() async {
-  if (_selectedZona == null ||
-      _selectedStand == null ||
-      _selectedFila == null ||
-      _selectedColumna == null ||
-      _cantidadController.text.isEmpty ||
-      _usuarioController.text.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Por favor, completa todos los campos')),
-    );
-    return;
-  }
-
-  // Mostrar indicador de carga
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return const Dialog(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Cargando...'),
-            ],
-          ),
-        ),
+    if (_selectedZona == null ||
+        _selectedStand == null ||
+        _selectedFila == null ||
+        _selectedColumna == null ||
+        _cantidadController.text.isEmpty ||
+        _usuarioController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, completa todos los campos')),
       );
-    },
-  );
-
-  try {
-    final codigoSba = widget.codSba;
-    final uploadUrl = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
-
-    var request = http.MultipartRequest('POST', Uri.parse(uploadUrl))
-      ..fields['search'] = codigoSba
-      ..fields['ubicacion'] = codigoSba
-      ..fields['zona'] = _selectedZona!
-      ..fields['stand'] = _selectedStand!
-      ..fields['col'] = _selectedColumna!
-      ..fields['fil'] = _selectedFila!
-      ..fields['cantidad'] = _cantidadController.text
-      ..fields['usuario'] = _usuarioController.text;
-
-    for (var image in _images) {
-      var file = await http.MultipartFile.fromPath('img[]', image.path);
-      request.files.add(file);
-    }
-
-    var response = await request.send();
-
-    Navigator.of(context).pop(); // Cerrar el indicador de carga
-
-    var responseBody = await response.stream.bytesToString();
-    if (responseBody.contains('<html>')) {
-      _showErrorDialog('Error del servidor: Respuesta en formato HTML');
       return;
     }
-    
-    var responseData = json.decode(responseBody);
-    if (responseData['success'] != null) {
-      setState(() {
-        _clearTextControllers();
-      });
-      _showSuccessDialog('Datos insertados correctamente');
-    } else if (responseData['error'] != null) {
-      _showErrorDialog('Error: ${responseData['error']}');
-    }
-  } catch (e) {
-    Navigator.of(context)
-        .pop(); // Cerrar el indicador de carga en caso de error
-    _showErrorDialog('Error: $e');
-  }
-}
 
+    // Mostrar indicador de carga
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Dialog(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Cargando...'),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    try {
+      final codigoSba = widget.codSba;
+      final uploadUrl = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
+
+      var request = http.MultipartRequest('POST', Uri.parse(uploadUrl))
+        ..fields['search'] = codigoSba
+        ..fields['ubicacion'] = codigoSba
+        ..fields['zona'] = _selectedZona!
+        ..fields['stand'] = _selectedStand!
+        ..fields['col'] = _selectedColumna!
+        ..fields['fil'] = _selectedFila!
+        ..fields['cantidad'] = _cantidadController.text
+        ..fields['usuario'] = _usuarioController.text;
+
+      for (var image in _images) {
+        var file = await http.MultipartFile.fromPath('img[]', image.path);
+        request.files.add(file);
+      }
+
+      var response = await request.send();
+
+      Navigator.of(context).pop(); // Cerrar el indicador de carga
+
+      var responseBody = await response.stream.bytesToString();
+      if (responseBody.contains('<html>')) {
+        _showErrorDialog('Error del servidor: Respuesta en formato HTML');
+        return;
+      }
+
+      var responseData = json.decode(responseBody);
+      if (responseData['success'] != null) {
+        setState(() {
+          _clearTextControllers();
+        });
+        _showSuccessDialog('Datos insertados correctamente');
+      } else if (responseData['error'] != null) {
+        _showErrorDialog('Error: ${responseData['error']}');
+      }
+    } catch (e) {
+      Navigator.of(context)
+          .pop(); // Cerrar el indicador de carga en caso de error
+      _showErrorDialog('Error: $e');
+    }
+  }
 
   void _clearTextControllers() {
     _cantidadController.clear();
@@ -225,43 +189,59 @@ class _VistaFiltroState extends State<VistaFiltro> {
   }
 
   void _showSuccessDialog(String message) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Éxito'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            child: const Text('OK'),
-            onPressed: () {
-              Navigator.pop(context); // Cierra el diálogo
-              Navigator.pop(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const NuevaVistaDetalle(jsonData: [], jsonDataUbi: [], codigoSba: '', barcode: '',),
-                transitionDuration: const Duration(milliseconds: 500),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  return SlideTransition(
-                    position: Tween<Offset>(
-                      end: Offset.zero,
-                      begin: const Offset(-1.0, 0.0),
-                    ).animate(animation),
-                    child: child,
-                  );
-                },
-              ),
-            );
-            },
-          ),
-        ],
-      );
-    },
-  );
-}
-
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Éxito'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.pop(context); // Cierra el diálogo
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NavNuevaVistaDetalle(
+                      jsonData: widget.jsonData,
+                      jsonDataUbi: widget.jsonDataUbi,
+                      codigoSba: widget.codSba,
+                      barcode: widget.barcode,
+                    ),
+                    maintainState: false, // Agrega esta propiedad
+                  ),
+                );
+                /* Navigator.pushReplacement(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        NavNuevaVistaDetalle(
+                      jsonData: widget.jsonData,
+                      jsonDataUbi: widget.jsonDataUbi,
+                      codigoSba: widget.codSba,
+                      barcode: widget.barcode,
+                    ),
+                    transitionDuration: const Duration(milliseconds: 500),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                          end: Offset.zero,
+                          begin: const Offset(1.0, 0.0),
+                        ).animate(animation),
+                        child: child,
+                      );
+                    },
+                  ),
+                );*/
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -460,7 +440,6 @@ class _VistaFiltroState extends State<VistaFiltro> {
                       ),
                     ),
                   ),
-                  
                 ],
               ),
             ),
@@ -474,7 +453,6 @@ class _VistaFiltroState extends State<VistaFiltro> {
         ),
         disabledColor: Colors.grey,
         onPressed: () {
-          obtenerDatosUbicacion(widget.codSba);
           enviarData();
         },
         color: Color.fromARGB(255, 49, 55, 59),

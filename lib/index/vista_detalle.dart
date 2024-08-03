@@ -62,7 +62,7 @@ class _VistaDetalleState extends State<VistaDetalle> {
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => VistaFiltro(
           barcode: widget.barcode,
-          codSba: widget.codSba, jsonData: [], 
+          codSba: widget.codSba, jsonData: [], jsonDataUbi: [], 
         ),
         transitionDuration: const Duration(milliseconds: 500),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {

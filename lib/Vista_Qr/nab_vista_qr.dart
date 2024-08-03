@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:app_dlog/index/nav_nueva_vista_detalle.dart';
 import 'package:app_dlog/index/nueva_vista_detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -130,11 +131,8 @@ class _IndexPagQrState extends State<IndexPagQr> {
           context,
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
-                NuevaVistaDetalle(
-              jsonData: jsonData,
-              jsonDataUbi: jsonDataUbi,
-              codigoSba: codigoSba,
-              barcode: '',
+                NavNuevaVistaDetalle(jsonData: jsonData, jsonDataUbi: jsonDataUbi, codigoSba: codigoSba, barcode: '',
+             
             ),
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder:
