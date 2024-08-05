@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 
-class TablaUbicacion extends StatelessWidget {
+class TablaUbicacion extends StatefulWidget {
   final List<dynamic> jsonData;
   final List<dynamic> jsonDataUbi;
 
@@ -17,14 +17,34 @@ class TablaUbicacion extends StatelessWidget {
     required this.jsonDataUbi,
   }) : super(key: key);
 
+  @override
+  State<TablaUbicacion> createState() => _TablaUbicacionState();
+}
+
+class _TablaUbicacionState extends State<TablaUbicacion> {
+
+
+
+late AppProvider _appProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _appProvider = Provider.of<AppProvider>(context, listen: false);
+  }
+
+
+
+
+  
   Future<void> _eliminarDataPorId(BuildContext context, int ids, String nombre) async {
     try {
       final url = 'http://190.107.181.163:81/amq/flutter_ajax_ubi_delete.php?id_ubi=$ids&usuario=$nombre';
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        Provider.of<AppProvider>(context, listen: false).removeDataById(ids);
-        print('Estado actualizado correctamente');
+        _appProvider.removeDataById(ids);
+        print('Estado actualizado correctamente de la clase');
       } else {
         print('Error: ${response.statusCode}');
       }
@@ -67,7 +87,7 @@ class TablaUbicacion extends StatelessWidget {
   Widget build(BuildContext context) {
     double totalCantidadUbicaciones = 0.0;
 
-    for (var data in jsonDataUbi) {
+    for (var data in widget.jsonDataUbi) {
       if (data['Cantidad'] != null && data['Cantidad'] is num) {
         totalCantidadUbicaciones += data['Cantidad'];
       } else if (data['Cantidad'] != null && data['Cantidad'] is String) {
@@ -76,7 +96,7 @@ class TablaUbicacion extends StatelessWidget {
     }
 
     double totalCantidadAlmacen = 0.0;
-    jsonData
+    widget.jsonData
         .where((data) => ![
               'ALMACEN DE FALTANTES',
               'ALMACEN DE PRODUCTOS TERMINADO',
@@ -94,6 +114,7 @@ class TablaUbicacion extends StatelessWidget {
       totalCantidadAlmacen += stockValue;
     });
 
+    
     // ignore: unused_local_variable
     double diferencia = totalCantidadAlmacen - totalCantidadUbicaciones;
     final appProvider = Provider.of<AppProvider>(context);

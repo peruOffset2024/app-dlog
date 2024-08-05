@@ -46,11 +46,6 @@ class _TablaAlmacenState extends State<TablaAlmacen> {
       totalCantidad += stockValue;
     });
 
-    // Invoke the callback with the calculated totalQuantity
-   /* WidgetsBinding.instance.addPostFrameCallback((_) {
-      onTotalCantidadCalculated(totalCantidad);
-    });*/
-
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(

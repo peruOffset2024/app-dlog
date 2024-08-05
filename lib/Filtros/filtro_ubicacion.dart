@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:app_dlog/index/nav_nueva_vista_detalle.dart';
-import 'package:app_dlog/index/vista_detalle.dart';
+import 'package:app_dlog/index/nueva_vista_detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -29,7 +28,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
   final List<String> _stand = ['1', '2', '3', '4', '5', '6'];
   final List<String> _fila = ['1', '2', '3', '4', '5', '6'];
   final List<String> _columna = ['1', '2', '3', '4', '5', '6'];
-
+   
   String? _selectedZona;
   String? _selectedStand;
   String? _selectedFila;
@@ -39,6 +38,10 @@ class _VistaFiltroState extends State<VistaFiltro> {
   final TextEditingController _usuarioController = TextEditingController();
   List<dynamic> jsonDataUbi = [];
   ValueNotifier<List<dynamic>> notifier = ValueNotifier([]);
+
+
+  
+  
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
@@ -159,7 +162,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
         setState(() {
           _clearTextControllers();
         });
-        _showSuccessDialog('Datos insertados correctamente');
+        _showSuccessDialog('Nueva ubicación insertada exitosamente');
       } else if (responseData['error'] != null) {
         _showErrorDialog('Error: ${responseData['error']}');
       }
@@ -200,23 +203,23 @@ class _VistaFiltroState extends State<VistaFiltro> {
               child: const Text('OK'),
               onPressed: () {
                 Navigator.pop(context); // Cierra el diálogo
-                Navigator.pushReplacement(
+               /* Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => NavNuevaVistaDetalle(
-                      jsonData: widget.jsonData,
-                      jsonDataUbi: widget.jsonDataUbi,
+                    builder: (context) => NuevaVistaDetalle(
+                      jsonData: _appProvider.jsonData,
+                      jsonDataUbi: _appProvider.jsonDataUbi,
                       codigoSba: widget.codSba,
                       barcode: widget.barcode,
                     ),
                     maintainState: false, // Agrega esta propiedad
                   ),
-                );
-                /* Navigator.pushReplacement(
+                );*/
+                 Navigator.pushReplacement(
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        NavNuevaVistaDetalle(
+                        NuevaVistaDetalle(
                       jsonData: widget.jsonData,
                       jsonDataUbi: widget.jsonDataUbi,
                       codigoSba: widget.codSba,
@@ -234,7 +237,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                       );
                     },
                   ),
-                );*/
+                );
               },
             ),
           ],
@@ -267,32 +270,31 @@ class _VistaFiltroState extends State<VistaFiltro> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const VistaDetalle(
-                  barcode: '',
-                  codSba: '',
-                ),
-                transitionDuration: const Duration(milliseconds: 500),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  return SlideTransition(
-                    position: Tween<Offset>(
-                      end: const Offset(1.0, 0.0),
-                      begin: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  );
-                },
-              ),
-            );
-          },
-          icon: const Icon(Icons.arrow_back),
-        ),
+        leading: IconButton(onPressed: (){
+          Navigator.pushReplacement(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        NuevaVistaDetalle(
+                      jsonData: widget.jsonData,
+                      jsonDataUbi: widget.jsonDataUbi,
+                      codigoSba: widget.codSba,
+                      barcode: widget.barcode,
+                    ),
+                    transitionDuration: const Duration(milliseconds: 500),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                         end: Offset.zero,
+                      begin: const Offset(-1.0, 0.0),
+                        ).animate(animation),
+                        child: child,
+                      );
+                    },
+                  ),
+                );
+        }, icon: Icon(Icons.arrow_back),),
       ),
       body: Column(
         children: [

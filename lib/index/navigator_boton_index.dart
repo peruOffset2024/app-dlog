@@ -12,7 +12,7 @@ class NavigatorBotonIndex extends StatefulWidget {
 }
 
 class _NavigatorBotonIndexState extends State<NavigatorBotonIndex> {
-  int indice = 0;
+  int indice = 1;
 
   List<Widget> numRutas = [
     const Pag1(),

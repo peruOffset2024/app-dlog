@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:app_dlog/index/nav_nueva_vista_detalle.dart';
 import 'package:app_dlog/index/nueva_vista_detalle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -131,7 +130,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
           context,
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
-                NavNuevaVistaDetalle(jsonData: jsonData, jsonDataUbi: jsonDataUbi, codigoSba: codigoSba, barcode: '',
+                NuevaVistaDetalle(jsonData: jsonData, jsonDataUbi: jsonDataUbi, codigoSba: codigoSba, barcode: '',
              
             ),
             transitionDuration: const Duration(milliseconds: 500),
@@ -185,7 +184,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
         }
 
         // Realizar petición GET a la ruta del API para obtener los datos de ubicación
-        final codigoSba = _codigoSbaController.text;
+    
         final urlUbi =
             'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$barcodeScanRes';
         final responseUbi = await http.get(Uri.parse(urlUbi));
@@ -205,7 +204,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
                   NuevaVistaDetalle(
                 jsonData: jsonData,
                 jsonDataUbi: jsonDataUbi,
-                codigoSba: codigoSba,
+                codigoSba: '',
                 barcode: barcodeScanRes,
               ),
               transitionDuration: const Duration(milliseconds: 500),
@@ -238,5 +237,4 @@ class _IndexPagQrState extends State<IndexPagQr> {
       print('Error al escanear QR: $e');
     }
   }
-
 }
