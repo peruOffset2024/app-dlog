@@ -57,6 +57,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
           setState(() {
             jsonDataUbi = [];
           });
+          // ignore: avoid_print
           print(
               'Error al consumir el API. Código de estado: ${response.statusCode}');
         }
@@ -64,12 +65,14 @@ class _VistaFiltroState extends State<VistaFiltro> {
         setState(() {
           jsonDataUbi = [];
         });
+        // ignore: avoid_print
         print('Código SBA vacío');
       }
     } catch (e) {
       setState(() {
         jsonDataUbi = [];
       });
+      // ignore: avoid_print
       print('Error: $e');
     }
   }
@@ -140,12 +143,12 @@ class _VistaFiltroState extends State<VistaFiltro> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return Dialog(
+        return const Dialog(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
                 Text('Cargando...'),
@@ -158,7 +161,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
 
     try {
       final codigoSba = widget.codSba;
-      final uploadUrl = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
+      const uploadUrl = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
 
       var request = http.MultipartRequest('POST', Uri.parse(uploadUrl))
         ..fields['search'] = codigoSba
@@ -177,6 +180,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
 
       var response = await request.send();
 
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pop(); // Cerrar el indicador de carga
 
       if (response.statusCode == 200) {
@@ -195,6 +199,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
             'Error al enviar datos a la API. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       Navigator.of(context)
           .pop(); // Cerrar el indicador de carga en caso de error
       _showErrorDialog('Error: $e');
@@ -381,7 +386,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                         height: 300,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          color: Color.fromARGB(255, 49, 55, 59),
+                          color: const Color.fromARGB(255, 49, 55, 59),
                         ),
                         child: _images.isNotEmpty
                             ? CarouselSlider(
@@ -455,9 +460,9 @@ class _VistaFiltroState extends State<VistaFiltro> {
           obtenerDatosUbicacion(widget.codSba);
           enviarData();
         },
-        color: Color.fromARGB(255, 49, 55, 59),
+        color: const Color.fromARGB(255, 49, 55, 59),
         child: Container(
-          padding: EdgeInsets.symmetric(
+          padding: const EdgeInsets.symmetric(
             horizontal: 338,
             vertical: 30,
           ),
@@ -480,7 +485,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
           value: item,
           child: Text(
             item,
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         );
       }).toList(),

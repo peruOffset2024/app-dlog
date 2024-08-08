@@ -1,6 +1,9 @@
 import 'package:app_dlog/index/navigator_boton_index.dart';
+import 'package:app_dlog/index/providers/auth_provider.dart';
 import 'package:app_dlog/login/Clases_por_consumir/input_decorations.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+// Ajusta la ruta a tu archivo AuthProvider
 
 class IniciarSesion extends StatefulWidget {
   const IniciarSesion({super.key});
@@ -41,9 +44,9 @@ class _IniciarSesionState extends State<IniciarSesion> {
   Widget loginform(BuildContext context, Size size) {
     return Center(
       child: Container(
-        padding: EdgeInsets.all(size.width * 0.05), // const EdgeInsets.all(20),
-        margin: EdgeInsets.symmetric(horizontal: size.width * 0.08), // const EdgeInsets.symmetric(horizontal: 30),
-        width: size.width * 0.9, // margin: width: 350,
+        padding: EdgeInsets.all(size.width * 0.05),
+        margin: EdgeInsets.symmetric(horizontal: size.width * 0.08),
+        width: size.width * 0.9,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(25),
@@ -91,30 +94,69 @@ class _IniciarSesionState extends State<IniciarSesion> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  MaterialButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    disabledColor: Colors.grey,
-                    onPressed: () async {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const NavigatorBotonIndex(),
+                  Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      return MaterialButton(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        disabledColor: Colors.grey,
+                        onPressed: authProvider.isAuthenticated
+                            ? () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const NavigatorBotonIndex(),
+                                  ),
+                                );
+                              }
+                            : () async {
+                                if (_formKey.currentState?.validate() ??
+                                    false) {
+                                  try {
+                                    await authProvider.login(
+                                      _numeroController.text,
+                                      _passwordController.text,
+                                    );
+                                    if (authProvider.isAuthenticated) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const NavigatorBotonIndex(),
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content:
+                                                Text('Invalid credentials')),
+                                      );
+                                    }
+                                  } catch (error) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content:
+                                              Text('Authentication failed')),
+                                    );
+                                  }
+                                }
+                              },
+                        color: Colors.deepPurple,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: size.width * 0.2,
+                            vertical: size.height * 0.02,
+                          ),
+                          child: const Text(
+                            'Ingresar',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       );
                     },
-                    color: Colors.deepPurple,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: size.width * 0.2,
-                        vertical: size.height * 0.02,
-                      ),
-                      child: const Text(
-                        'Ingresar',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
                   ),
                   const SizedBox(height: 20),
                 ],
@@ -143,7 +185,7 @@ class _IniciarSesionState extends State<IniciarSesion> {
 
   Container cajapurpura(Size size) {
     return Container(
-      transform: Matrix4.rotationZ(-0.2), // adjust the rotation angle here
+      transform: Matrix4.rotationZ(-0.2),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -155,7 +197,6 @@ class _IniciarSesionState extends State<IniciarSesion> {
       width: double.infinity,
       height: size.height * 0.49,
       child: ClipPath(
-        clipper: CurvedClipper(), // custom clipper class
         child: Stack(
           children: [
             Positioned(
@@ -209,25 +250,4 @@ class _IniciarSesionState extends State<IniciarSesion> {
       ),
     );
   }
-}
-
-class CurvedClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    Path path = Path();
-    path.lineTo(0, size.height * 0.2); // start at the top left
-    path.quadraticBezierTo(
-      size.width * 0.02,
-      size.height * 0.5,
-      size.width * 0.25, // adjust this value to change the curve
-      size.height * 0.5,
-    ); // curve to the left
-    path.lineTo(size.width, size.height * 0.2); // bottom right
-    path.lineTo(size.width, 0); // top right
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

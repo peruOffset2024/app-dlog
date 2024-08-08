@@ -1,4 +1,6 @@
+import 'package:app_dlog/index/providers/appprovider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 
 class TablaAlmacen extends StatefulWidget {
@@ -7,18 +9,19 @@ class TablaAlmacen extends StatefulWidget {
 
   // ignore: use_key_in_widget_constructors
   const TablaAlmacen({
-    Key? key,
+    super.key,
     required this.jsonData,
     required List resultados,
     required List jsonDataUbi,
     //required this.onTotalCantidadCalculated, // Callback
-  }) : super(key: key);
+  });
 
   @override
   State<TablaAlmacen> createState() => _TablaAlmacenState();
 }
 
 class _TablaAlmacenState extends State<TablaAlmacen> {
+
   @override
   Widget build(BuildContext context) {
     // Lista de almacenes que deben considerarse para la suma
@@ -45,13 +48,13 @@ class _TablaAlmacenState extends State<TablaAlmacen> {
       }
       totalCantidad += stockValue;
     });
-
+    final appProvider = Provider.of<AppProvider>(context);
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (widget.jsonData.isNotEmpty) ...[
+          if (appProvider.jsonData.isNotEmpty) ...[
             Container(
               width: 700,
               padding: const EdgeInsets.all(10),
@@ -72,7 +75,7 @@ class _TablaAlmacenState extends State<TablaAlmacen> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    widget.jsonData.first['itemdescripcion'] ??
+                    appProvider.jsonData.first['itemdescripcion'] ??
                         'Descripción no disponible',
                     style: const TextStyle(
                       fontSize: 18,
@@ -85,7 +88,7 @@ class _TablaAlmacenState extends State<TablaAlmacen> {
             ),
             const SizedBox(height: 20),
           ],
-          if (widget.jsonData.isNotEmpty) ...[
+          if (appProvider.jsonData.isNotEmpty) ...[
               // ignore: sized_box_for_whitespace
               Container(
                 width: 600,
@@ -104,7 +107,7 @@ class _TablaAlmacenState extends State<TablaAlmacen> {
               ),
               const SizedBox(height: 10,)
             ],
-          widget.jsonData.isNotEmpty
+          appProvider.jsonData.isNotEmpty
               // ignore: sized_box_for_whitespace
               ? Container(
                   width: 700,
@@ -116,7 +119,7 @@ class _TablaAlmacenState extends State<TablaAlmacen> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: DataTable(
-                        headingRowColor: MaterialStateColor.resolveWith(
+                        headingRowColor: WidgetStateColor.resolveWith(
                           (states) => Colors.grey[300]!,
                         ),
                         columns: const [
@@ -141,7 +144,7 @@ class _TablaAlmacenState extends State<TablaAlmacen> {
                         ],
                         rows: [
                           //////
-                          ...widget.jsonData
+                          ...appProvider.jsonData
                               .where((data) =>
                                   !['ALMACEN DE FALTANTES', 'ALMACEN PROVEEDOR'].contains(data['Name']))
                               .map<DataRow>((data) {
@@ -163,8 +166,9 @@ class _TablaAlmacenState extends State<TablaAlmacen> {
                                 )),
                               ],
                             );
+                          // ignore: unnecessary_to_list_in_spreads
                           }).toList(),
-                          if (widget.jsonData.any((data) =>
+                          if (appProvider.jsonData.any((data) =>
                               almacenesConsiderados.contains(data['Name'])))
                             DataRow(
                               cells: [

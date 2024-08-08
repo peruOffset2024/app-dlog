@@ -3,11 +3,10 @@ import 'package:app_dlog/index/Botones/widget_personalizado.dart';
 import 'package:app_dlog/index/PruebasconotroProyecto/tabla_stock_sistema.dart';
 import 'package:app_dlog/index/PruebasconotroProyecto/tabla_stock_fisico.dart';
 import 'package:app_dlog/index/indicador_de_carga.dart';
-import 'package:app_dlog/index/navigator_boton_index.dart';
+
 import 'package:app_dlog/index/providers/appprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-  // Asegúrate de importar tu clase LoadingIndicator aquí.
 
 class NuevaVistaDetalle extends StatefulWidget {
   const NuevaVistaDetalle({
@@ -31,7 +30,9 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   late AppProvider _appProvider;
   int indice = 0;
+  // ignore: unused_field
   late Future<void> _actPantalla;
+  late Future<void> _future = Future.value();
   double _arriba = 0;
   double _izquierdo = 0;
   double totalCantidadUbicaciones = 0.0;
@@ -43,15 +44,16 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
     super.initState();
     _actPantalla = _actualizarPantalla();
     _appProvider = Provider.of<AppProvider>(context, listen: false);
-   
-
     _appProvider.fetchData(widget.codigoSba);
     _appProvider.fetchDataUbi(widget.codigoSba);
+    print('aQUI EL JSON _appProvider : $_appProvider');
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final anchoPantalla = MediaQuery.of(context).size.width;
       final alturaPantalla = MediaQuery.of(context).size.height;
-
+       _future =  _appProvider.fetchData(widget.codigoSba);
+       _appProvider.fetchDataUbi(widget.codigoSba);
+    
       setState(() {
         _arriba = anchoPantalla - 80;
         _izquierdo = alturaPantalla - 1100;
@@ -81,7 +83,7 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
 
   void _navegarSiguientePag() {
     final codigoSba3 = widget.codigoSba;
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
@@ -143,37 +145,13 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pushReplacement(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        const NavigatorBotonIndex(
-                    ),
-                    transitionDuration: const Duration(milliseconds: 500),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
-                      return SlideTransition(
-                        position: Tween<Offset>(
-                         end: Offset.zero,
-                      begin: const Offset(-1.0, 0.0),
-                        ).animate(animation),
-                        child: child,
-                      );
-                    },
-                  ),
-                );
-          },
-          child: const Icon(Icons.arrow_back),
-        ),
       ),
       body: Stack(
         children: [
           RefreshIndicator(
             onRefresh: _refrescarPantalla,
             child: FutureBuilder(
-                future: _actPantalla,
+                future: _future,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const LoadingIndicator();
@@ -189,13 +167,14 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
                           children: [
                             TablaAlmacen(
                               jsonData: _appProvider.jsonData,
-                              resultados: [],
+                              resultados: const [],
                               jsonDataUbi: _appProvider.jsonDataUbi,
                             ),
                             TablaUbicacion(
                               jsonData: _appProvider.jsonData,
                               jsonDataUbi: _appProvider.jsonDataUbi,
                             ),
+                           
                           ],
                         ),
                       ),
@@ -245,7 +224,7 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
             BottomNavigationBarItem(
               icon: Container(
                 width: 150,
-                padding: EdgeInsets.all(4),
+                padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: Colors.blue.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(10),
@@ -259,14 +238,14 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
                       color: indice == 0 ? Colors.blue : Colors.black,
                     ),
                     Text(
-                      'Ubicaciones',
+                      'Stock Fisico',
                       style: TextStyle(
                         fontSize: 12,
                         color: indice == 0 ? Colors.blue : Colors.black,
                       ),
                     ),
                     Text(
-                      '$totalCantidadUbicaciones',
+                      '$diferencia',
                       style: TextStyle(
                         fontSize: 12,
                         color: indice == 0 ? Colors.blue : Colors.black,
@@ -280,7 +259,7 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
             BottomNavigationBarItem(
               icon: Container(
                 width: 150,
-                padding: EdgeInsets.all(4),
+                padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: Colors.green.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(10),
@@ -294,7 +273,7 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
                       color: indice == 1 ? const Color.fromARGB(255, 16, 187, 21) : Colors.black,
                     ),
                     Text(
-                      'Almacén',
+                      'Stock Sistema',
                       style: TextStyle(
                         fontSize: 12,
                         color: indice == 1 ? const Color.fromARGB(255, 16, 187, 21) : Colors.black,
@@ -315,7 +294,7 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
             BottomNavigationBarItem(
               icon: Container(
                 width: 150,
-                padding: EdgeInsets.all(4),
+                padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: Colors.red.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(10),
@@ -336,7 +315,7 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
                       ),
                     ),
                     Text(
-                      '$diferencia',
+                      '$totalCantidadUbicaciones',
                       style: TextStyle(
                         fontSize: 12,
                         color: indice == 2 ? Colors.red : Colors.black,

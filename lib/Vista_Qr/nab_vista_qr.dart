@@ -19,77 +19,94 @@ class _IndexPagQrState extends State<IndexPagQr> {
   List<dynamic> jsonData = [];
   List<dynamic> jsonDataUbi = [];
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        children: [
-          SingleChildScrollView(
+      
+      body: Center(
+        child: Container(
+          padding: const EdgeInsets.all(20.0),
+          decoration: const BoxDecoration(),
+          child: SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(
-                  height: 350,
-                ),
                 const Text('CONSULTAR EN AMP',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(
-                  height: 50,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      SizedBox(
-                        width: 400,
-                        child: TextFormField(
-                          autocorrect: false,
-                          autofocus: false,
-                          controller: _codigoSbaController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            enabledBorder: OutlineInputBorder(),
-                            hintText: 'Ingrese Código SBA',
-                            prefixIcon: Icon(Icons.search),
-                          ),
-                          style: TextStyle(
-                            color: Colors.grey[800],
-                            shadows: const [
-                              Shadow(
-                                offset: Offset(0, 1),
-                                blurRadius: 2,
-                                color: Color.fromARGB(255, 156, 148, 148),
+                            style: TextStyle(
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 194, 2, 2),
+                            ),),
+                            const SizedBox(height: 20,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                  
+                  SizedBox(
+                    width: 500,
+                    child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    elevation: 5.0,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          
+                          TextFormField(
+                            autocorrect: false,
+                            autofocus: false,
+                            controller: _codigoSbaController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color.fromARGB(255, 6, 37, 63),
+                                ),
                               ),
-                            ],
+                              hintText: 'Ingrese Código SBA',
+                              prefixIcon: Icon(Icons.search),
+                            ),
+                            style: TextStyle(
+                              color: Colors.grey[800],
+                              shadows: const [
+                                Shadow(
+                                  offset: Offset(0, 1),
+                                  blurRadius: 2,
+                                  color: Color.fromARGB(255, 156, 148, 148),
+                                ),
+                              ],
+                            ),
+                            onFieldSubmitted: (value) {
+                              _obtenerDatosApi();
+                            },
                           ),
-                          onFieldSubmitted: (value) {
-                            _obtenerDatosApi();
-                          },
-                        ),
+                          
+                        ],
                       ),
-                      const SizedBox(width: 2),
-                      SizedBox(
-                        height: 70,
-                        width: 70,
-                        child: FloatingActionButton(
-                          elevation: 20,
-                          backgroundColor: const Color.fromARGB(255, 59, 252, 232),
-                          onPressed: _scanearCodigo1,
-                          child: const Icon(
-                            Icons.qr_code,
-                            size: 50,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
+                                ),
                   ),
-                ),
+                  SizedBox(
+                    height: 90,
+                    width: 90,
+                    child: FloatingActionButton(
+                      onPressed: _scanearCodigo1,
+                      backgroundColor: const Color.fromARGB(234, 25, 168, 173),
+                      child: const Icon(
+                        size: 70,
+                        Icons.qr_code),
+                    ),
+                  ),
+                ],),
+                
+                const SizedBox(height: 20.0),
+                
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -103,6 +120,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
         final response = await http.get(Uri.parse(url));
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
+          print('el error ------- : ${response.statusCode}');
           setState(() {
             jsonData = data is List<dynamic> ? data : [];
           });
@@ -110,14 +128,17 @@ class _IndexPagQrState extends State<IndexPagQr> {
           setState(() {
             jsonData = [];
           });
+          // ignore: avoid_print
           print('Error al consumir el API');
         }
       } else {
+        // ignore: avoid_print
         print('Ingrese un codigo SBA valido');
       }
 
       // codigo para consumir el api de la url de Ubicaciones
 
+      // ignore: non_constant_identifier_names
       final UrlUbicaciones =
           'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$codigoSba';
       final responseUbicaciones = await http.get(Uri.parse(UrlUbicaciones));
@@ -126,31 +147,36 @@ class _IndexPagQrState extends State<IndexPagQr> {
         setState(() {
           jsonDataUbi = dataUbi is List<dynamic> ? dataUbi : [];
         });
+        print('el error ------- : ${responseUbicaciones.statusCode}');
         Navigator.push(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                NuevaVistaDetalle(jsonData: jsonData, jsonDataUbi: jsonDataUbi, codigoSba: codigoSba, barcode: '',
-             
-            ),
-            transitionDuration: const Duration(milliseconds: 500),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(1.0, 0.0),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: child,
-              );
-            },
-          ),
-        );
+            // ignore: use_build_context_synchronously
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  NuevaVistaDetalle(
+                jsonData: const [],
+                jsonDataUbi: const [],
+                codigoSba: codigoSba,
+                barcode: '',
+              ),
+              transitionDuration: const Duration(milliseconds: 500),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(1.0, 0.0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                );
+              },
+            ));
         _codigoSbaController.clear();
       } else {
         setState(() {
           jsonDataUbi = [];
         });
+        // ignore: avoid_print
         print('Error al obtener datos de la ubicacion');
       }
     } catch (e) {
@@ -158,6 +184,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
         jsonDataUbi = [];
         jsonDataUbi = [];
       });
+      // ignore: avoid_print
       print('Error: $e');
     }
   }
@@ -175,6 +202,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
           setState(() {
             jsonData = data is List<dynamic> ? data : [];
           });
+          print('Aqui los datos del Api jsonData: $jsonData');
         } else {
           setState(() {
             jsonData = [];
@@ -184,27 +212,32 @@ class _IndexPagQrState extends State<IndexPagQr> {
         }
 
         // Realizar petición GET a la ruta del API para obtener los datos de ubicación
-    
+
         final urlUbi =
             'http://190.107.181.163:81/amq/flutter_ajax_ubi.php?search=$barcodeScanRes';
+            
         final responseUbi = await http.get(Uri.parse(urlUbi));
         if (responseUbi.statusCode == 200) {
           final dataUbi = jsonDecode(responseUbi.body);
           setState(() {
             jsonDataUbi = dataUbi is List<dynamic> ? dataUbi : [];
           });
+          print('Aqui los datos del Api jsonDataUBI: $jsonDataUbi');
+          print('Aqui los datos barcodeScanRes: $barcodeScanRes');
+
           bool? hasVibrator = await Vibration.hasVibrator();
           if (hasVibrator == true) {
             Vibration.vibrate();
           }
           Navigator.push(
+            // ignore: use_build_context_synchronously
             context,
             PageRouteBuilder(
               pageBuilder: (context, animation, secondaryAnimation) =>
                   NuevaVistaDetalle(
-                jsonData: jsonData,
-                jsonDataUbi: jsonDataUbi,
-                codigoSba: '',
+                jsonData: const [],
+                jsonDataUbi: const [],
+                codigoSba: barcodeScanRes, 
                 barcode: barcodeScanRes,
               ),
               transitionDuration: const Duration(milliseconds: 500),
@@ -220,7 +253,7 @@ class _IndexPagQrState extends State<IndexPagQr> {
               },
             ),
           );
-          _codigoSbaController.clear();
+          print('Aqui los datos barcodeScanRes: $barcodeScanRes');
         } else {
           setState(() {
             jsonDataUbi = [];

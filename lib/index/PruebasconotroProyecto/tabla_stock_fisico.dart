@@ -1,6 +1,4 @@
-
 import 'dart:convert';
-
 import 'package:app_dlog/index/providers/appprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -11,11 +9,11 @@ class TablaUbicacion extends StatefulWidget {
   final List<dynamic> jsonData;
   final List<dynamic> jsonDataUbi;
 
-  TablaUbicacion({
-    Key? key,
+  const TablaUbicacion({
+    super.key,
     required this.jsonData,
     required this.jsonDataUbi,
-  }) : super(key: key);
+  });
 
   @override
   State<TablaUbicacion> createState() => _TablaUbicacionState();
@@ -33,9 +31,6 @@ late AppProvider _appProvider;
     _appProvider = Provider.of<AppProvider>(context, listen: false);
   }
 
-
-
-
   
   Future<void> _eliminarDataPorId(BuildContext context, int ids, String nombre) async {
     try {
@@ -44,11 +39,14 @@ late AppProvider _appProvider;
 
       if (response.statusCode == 200) {
         _appProvider.removeDataById(ids);
+        // ignore: avoid_print
         print('Estado actualizado correctamente de la clase');
       } else {
+        // ignore: avoid_print
         print('Error: ${response.statusCode}');
       }
     } catch (e) {
+      // ignore: avoid_print
       print('Error: $e');
     }
   }
@@ -140,10 +138,10 @@ late AppProvider _appProvider;
                   ],
                 ),
               ),
-              SizedBox(height: 10)
+              const SizedBox(height: 10)
             ],
             appProvider.jsonDataUbi.isNotEmpty
-                ? Container(
+                ? SizedBox(
                     width: 700,
                     child: Card(
                       elevation: 2,
@@ -155,7 +153,7 @@ late AppProvider _appProvider;
                         child: DataTable(
                           columnSpacing: 10.0,
                           horizontalMargin: 20.0,
-                          headingRowColor: MaterialStateColor.resolveWith(
+                          headingRowColor: WidgetStateColor.resolveWith(
                             (states) => Colors.grey[300]!,
                           ),
                           columns: const [
@@ -245,58 +243,58 @@ late AppProvider _appProvider;
                               return DataRow(
                                 cells: [
                                   DataCell(IconButton(
-                                    icon: Icon(Icons.delete),
+                                    icon: const Icon(Icons.delete),
                                     onPressed: () {
                                       _alertMensaje(context, ids, nombre);
                                     },
                                   )),
                                   DataCell(Container(
-                                    padding: EdgeInsets.all(8),
+                                    padding: const EdgeInsets.all(8),
                                     child: Text(
                                       data['id'] ?? 'Sin ID',
-                                      style: TextStyle(fontSize: 14),
+                                      style: const TextStyle(fontSize: 14),
                                     ),
                                   )),
                                   DataCell(Container(
-                                    padding: EdgeInsets.all(8),
+                                    padding: const EdgeInsets.all(8),
                                     child: Text(
                                       data['Zona'] ?? 'Sin zona',
-                                      style: TextStyle(fontSize: 14),
+                                      style: const TextStyle(fontSize: 14),
                                     ),
                                   )),
                                   DataCell(Container(
-                                    padding: EdgeInsets.all(8),
+                                    padding: const EdgeInsets.all(8),
                                     child: Text(
                                       data['Stand'] ?? 'Sin stand',
-                                      style: TextStyle(fontSize: 14),
+                                      style: const TextStyle(fontSize: 14),
                                     ),
                                   )),
                                   DataCell(Container(
-                                    padding: EdgeInsets.all(8),
+                                    padding: const EdgeInsets.all(8),
                                     child: Text(
                                       data['col']?.toString() ?? 'Sin col',
-                                      style: TextStyle(fontSize: 14),
+                                      style: const TextStyle(fontSize: 14),
                                     ),
                                   )),
                                   DataCell(Container(
-                                    padding: EdgeInsets.all(8),
+                                    padding: const EdgeInsets.all(8),
                                     child: Text(
                                       data['fil']?.toString() ?? 'Sin fila',
-                                      style: TextStyle(fontSize: 14),
+                                      style: const TextStyle(fontSize: 14),
                                     ),
                                   )),
                                   DataCell(Container(
-                                    padding: EdgeInsets.all(8),
+                                    padding: const EdgeInsets.all(8),
                                     child: Text(
                                       data['Cantidad']?.toString() ??
                                           'Sin cantidad',
-                                      style: TextStyle(fontSize: 14),
+                                      style: const TextStyle(fontSize: 14),
                                     ),
                                   )),
                                   DataCell(
                                     imageUrls.isNotEmpty
                                         ? IconButton(
-                                            icon: Icon(Icons.image),
+                                            icon: const Icon(Icons.image),
                                             onPressed: () {
                                               showDialog(
                                                 context: context,
@@ -305,7 +303,7 @@ late AppProvider _appProvider;
                                                   return AlertDialog(
                                                     title:
                                                         const Text('Imágenes'),
-                                                    content: Container(
+                                                    content: SizedBox(
                                                       width: 400,
                                                       height: 500,
                                                       child: ListView.builder(
@@ -341,7 +339,7 @@ late AppProvider _appProvider;
                                                                       (context,
                                                                           error,
                                                                           stackTrace) {
-                                                                    return Center(
+                                                                    return const Center(
                                                                         child: Icon(
                                                                             Icons.error));
                                                                   },
@@ -349,9 +347,9 @@ late AppProvider _appProvider;
                                                               ),
                                                             );
                                                           } else {
-                                                            return Padding(
+                                                            return const Padding(
                                                               padding:
-                                                                  const EdgeInsets
+                                                                  EdgeInsets
                                                                       .symmetric(
                                                                       vertical:
                                                                           4.0),
@@ -384,25 +382,12 @@ late AppProvider _appProvider;
                                   ),
                                 ],
                               );
+                            // ignore: unnecessary_to_list_in_spreads
                             }).toList(),
                             DataRow(
                               cells: [
                                 DataCell(Container(
                                   padding: const EdgeInsets.all(8),
-                                  child: const Text(
-                                    '',
-                                    style: TextStyle(fontSize: 14),
-                                  ),
-                                )),
-                                DataCell(Container(
-                                  padding: const EdgeInsets.all(8),
-                                  child: const Text(
-                                    '',
-                                    style: TextStyle(fontSize: 14),
-                                  ),
-                                )),
-                                DataCell(Container(
-                                  padding: EdgeInsets.all(8),
                                   child: const Text(
                                     'TOTAL',
                                     style: TextStyle(
@@ -413,28 +398,42 @@ late AppProvider _appProvider;
                                   ),
                                 )),
                                 DataCell(Container(
-                                  padding: EdgeInsets.all(8),
+                                  padding: const EdgeInsets.all(8),
                                   child: const Text(
                                     '',
                                     style: TextStyle(fontSize: 14),
                                   ),
                                 )),
                                 DataCell(Container(
-                                  padding: EdgeInsets.all(8),
+                                  padding: const EdgeInsets.all(8),
+                                  child: const Text(
+                                    '',
+                                   
+                                  ),
+                                )),
+                                DataCell(Container(
+                                  padding: const EdgeInsets.all(8),
                                   child: const Text(
                                     '',
                                     style: TextStyle(fontSize: 14),
                                   ),
                                 )),
                                 DataCell(Container(
-                                  padding: EdgeInsets.all(8),
+                                  padding: const EdgeInsets.all(8),
                                   child: const Text(
                                     '',
                                     style: TextStyle(fontSize: 14),
                                   ),
                                 )),
                                 DataCell(Container(
-                                  padding: EdgeInsets.all(8),
+                                  padding: const EdgeInsets.all(8),
+                                  child: const Text(
+                                    '',
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                )),
+                                DataCell(Container(
+                                  padding: const EdgeInsets.all(8),
                                   child: Text(
                                     totalCantidadUbicaciones.toString(),
                                     style: const TextStyle(
@@ -445,7 +444,7 @@ late AppProvider _appProvider;
                                   ),
                                 )),
                                 DataCell(Container(
-                                  padding: EdgeInsets.all(8),
+                                  padding: const EdgeInsets.all(8),
                                   child: const Text(
                                     '',
                                     style: TextStyle(fontSize: 14),
@@ -454,6 +453,7 @@ late AppProvider _appProvider;
                               ],
                             ),
                           ],
+                          
                         ),
                       ),
                     ),

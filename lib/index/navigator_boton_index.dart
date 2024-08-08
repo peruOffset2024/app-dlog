@@ -1,8 +1,10 @@
+import 'package:app_dlog/index/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:app_dlog/Vista_Qr/nab_vista_qr.dart';
-import 'package:app_dlog/index/index.dart';
-import 'package:app_dlog/login/iniciar_sesion.dart'; // Asegúrate de importar tu pantalla de inicio de sesión
+import 'package:app_dlog/index/diferencias.dart';
+import 'package:app_dlog/login/iniciar_sesion.dart';
+import 'package:provider/provider.dart'; // Asegúrate de importar tu pantalla de inicio de sesión
 
 class NavigatorBotonIndex extends StatefulWidget {
   const NavigatorBotonIndex({super.key});
@@ -12,9 +14,10 @@ class NavigatorBotonIndex extends StatefulWidget {
 }
 
 class _NavigatorBotonIndexState extends State<NavigatorBotonIndex> {
-  int indice = 1;
+  int indice = 0;
 
   List<Widget> numRutas = [
+
     const Pag1(),
     const IndexPagQr(),
     
@@ -46,6 +49,7 @@ class _NavigatorBotonIndexState extends State<NavigatorBotonIndex> {
   );
 
   if (salir == true) {
+    Provider.of<AuthProvider>(context, listen: false).logout();
     Navigator.pushAndRemoveUntil(
       // ignore: use_build_context_synchronously
       context,

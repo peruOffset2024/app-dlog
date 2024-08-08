@@ -23,6 +23,7 @@ class AppProvider extends ChangeNotifier {
       throw Exception('Failed to load data');
     }
   } catch (e) {
+    // ignore: avoid_print
     print(e);
   }
 }
@@ -38,6 +39,7 @@ class AppProvider extends ChangeNotifier {
         throw Exception('Failed to load data');
       }
     } catch (e) {
+      // ignore: avoid_print
       print(e);
     }
   }
@@ -66,12 +68,14 @@ class AppProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         removeDataById(ids);
-        
+        // ignore: avoid_print
         print('Estado actualizado correctamente + del provider');
       } else {
+        // ignore: avoid_print
         print('Error: ${response.statusCode}');
       }
     } catch (e) {
+      // ignore: avoid_print
       print('Error: $e');
     }
   }
@@ -103,7 +107,7 @@ class AppProvider extends ChangeNotifier {
         if (responseUbi.statusCode == 200) {
           final dataUbi = jsonDecode(responseUbi.body);
             _jsonDataUbi = dataUbi is List<dynamic> ? dataUbi : [];
-         ;
+         
           bool? hasVibrator = await Vibration.hasVibrator();
           if (hasVibrator == true) {
             Vibration.vibrate();
@@ -111,6 +115,7 @@ class AppProvider extends ChangeNotifier {
          notifyListeners();
           
         } else {
+          // ignore: avoid_print
           print('Error al obtener datos de ubicación desde el escaneo QR');
         }
       } else {

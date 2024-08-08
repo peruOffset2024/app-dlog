@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:app_dlog/index/nueva_vista_detalle.dart';
+import 'package:app_dlog/index/providers/appprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:provider/provider.dart';
 
 class VistaFiltro extends StatefulWidget {
   const VistaFiltro({
@@ -24,15 +26,17 @@ class VistaFiltro extends StatefulWidget {
 }
 
 class _VistaFiltroState extends State<VistaFiltro> {
-  final List<String> _zona = ['A', 'B', 'C', 'D', 'E', 'F'];
+  final List<String> _zona = ['1', '2', 'C', 'D', 'E', 'F'];
   final List<String> _stand = ['1', '2', '3', '4', '5', '6'];
   final List<String> _fila = ['1', '2', '3', '4', '5', '6'];
   final List<String> _columna = ['1', '2', '3', '4', '5', '6'];
+  
    
   String? _selectedZona;
   String? _selectedStand;
   String? _selectedFila;
   String? _selectedColumna;
+  // ignore: prefer_final_fields
   List<File> _images = [];
   final TextEditingController _cantidadController = TextEditingController();
   final TextEditingController _usuarioController = TextEditingController();
@@ -40,7 +44,13 @@ class _VistaFiltroState extends State<VistaFiltro> {
   ValueNotifier<List<dynamic>> notifier = ValueNotifier([]);
 
 
-  
+  late AppProvider _appProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _appProvider = Provider.of<AppProvider>(context, listen: false);
+  }
   
 
   Future<void> _pickImage(ImageSource source) async {
@@ -130,11 +140,11 @@ class _VistaFiltroState extends State<VistaFiltro> {
 
     try {
       final codigoSba = widget.codSba;
-      final uploadUrl = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
+      const uploadUrl = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
 
       var request = http.MultipartRequest('POST', Uri.parse(uploadUrl))
         ..fields['search'] = codigoSba
-        ..fields['ubicacion'] = codigoSba
+        ..fields['ubicacion'] = '1'
         ..fields['zona'] = _selectedZona!
         ..fields['stand'] = _selectedStand!
         ..fields['col'] = _selectedColumna!
@@ -149,6 +159,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
 
       var response = await request.send();
 
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pop(); // Cerrar el indicador de carga
 
       var responseBody = await response.stream.bytesToString();
@@ -167,6 +178,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
         _showErrorDialog('Error: ${responseData['error']}');
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       Navigator.of(context)
           .pop(); // Cerrar el indicador de carga en caso de error
       _showErrorDialog('Error: $e');
@@ -220,8 +232,8 @@ class _VistaFiltroState extends State<VistaFiltro> {
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
                         NuevaVistaDetalle(
-                      jsonData: widget.jsonData,
-                      jsonDataUbi: widget.jsonDataUbi,
+                      jsonData: _appProvider.jsonData,
+                      jsonDataUbi: _appProvider.jsonDataUbi,
                       codigoSba: widget.codSba,
                       barcode: widget.barcode,
                     ),
@@ -268,34 +280,9 @@ class _VistaFiltroState extends State<VistaFiltro> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(onPressed: (){
-          Navigator.pushReplacement(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        NuevaVistaDetalle(
-                      jsonData: widget.jsonData,
-                      jsonDataUbi: widget.jsonDataUbi,
-                      codigoSba: widget.codSba,
-                      barcode: widget.barcode,
-                    ),
-                    transitionDuration: const Duration(milliseconds: 500),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
-                      return SlideTransition(
-                        position: Tween<Offset>(
-                         end: Offset.zero,
-                      begin: const Offset(-1.0, 0.0),
-                        ).animate(animation),
-                        child: child,
-                      );
-                    },
-                  ),
-                );
-        }, icon: Icon(Icons.arrow_back),),
-      ),
+      appBar: AppBar(),
       body: Column(
         children: [
           Expanded(
@@ -305,7 +292,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    ' DETALLE ITEM : ${widget.jsonData.first['ItemCode'] ?? 'N/A'}',
+                    ' DETALLE ITEM : ${_appProvider.jsonData.first['ItemCode'] ?? 'N/A'}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -313,7 +300,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                     ),
                   ),
                   Text(
-                    widget.jsonData.first['itemdescripcion'] ??
+                    _appProvider.jsonData.first['itemdescripcion'] ??
                         'Descripción no disponible',
                     style: const TextStyle(
                         fontSize: 18,
@@ -385,7 +372,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                         height: 300,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          color: Color.fromARGB(255, 49, 55, 59),
+                          color: const Color.fromARGB(255, 49, 55, 59),
                         ),
                         child: _images.isNotEmpty
                             ? CarouselSlider(
@@ -457,9 +444,9 @@ class _VistaFiltroState extends State<VistaFiltro> {
         onPressed: () {
           enviarData();
         },
-        color: Color.fromARGB(255, 49, 55, 59),
+        color: const Color.fromARGB(255, 49, 55, 59),
         child: Container(
-          padding: EdgeInsets.symmetric(
+          padding: const EdgeInsets.symmetric(
             horizontal: 338,
             vertical: 30,
           ),
@@ -482,7 +469,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
           value: item,
           child: Text(
             item,
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         );
       }).toList(),

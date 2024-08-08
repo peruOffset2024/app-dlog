@@ -91,7 +91,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
 
   Future<void> enviarData() async {
     try {
-      final url = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
+      const url = 'http://190.107.181.163:81/amq/flutter_ajax_add.php';
 
       final response = await http.post(
         Uri.parse(url),
@@ -120,12 +120,15 @@ class _VistaFiltroState extends State<VistaFiltro> {
           'usuario': _usuarioController.text,
           'img': _images.map((image) => image.path).toList(),
         };
+        // ignore: avoid_print
         print(newData);
         _clearTextControllers();
       } else {
+        // ignore: avoid_print
         print('Error al enviar datos a la API. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      // ignore: avoid_print
       print('Error: $e');
     }
   }
@@ -344,9 +347,9 @@ class _VistaFiltroState extends State<VistaFiltro> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    Row(
+                    const Row(
                       children: [
-                        const SizedBox(
+                        SizedBox(
                           width: 20,
                         ),
                         

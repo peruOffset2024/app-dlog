@@ -5,18 +5,18 @@ class ResumenDiferencias extends StatelessWidget {
   final double totalCantidadUbicaciones;
   final double diferencia;
 
-  ResumenDiferencias({
-    Key? key,
+  const ResumenDiferencias({
+    super.key,
     required this.totalCantidadAlmacen,
     required this.totalCantidadUbicaciones,
     required this.diferencia,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Resumen de Diferencias'),
+        title: const Text('Resumen de Diferencias'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
