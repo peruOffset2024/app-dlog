@@ -35,9 +35,6 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
   late Future<void> _future = Future.value();
   double _arriba = 0;
   double _izquierdo = 0;
-  double totalCantidadUbicaciones = 0.0;
-  double totalCantidadAlmacen = 0.0;
-  double diferencia = 0.0;
 
   @override
   void initState() {
@@ -46,23 +43,20 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
     _appProvider = Provider.of<AppProvider>(context, listen: false);
     _appProvider.fetchData(widget.codigoSba);
     _appProvider.fetchDataUbi(widget.codigoSba);
-    print('aQUI EL JSON _appProvider : $_appProvider');
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final anchoPantalla = MediaQuery.of(context).size.width;
-      final alturaPantalla = MediaQuery.of(context).size.height;
-       _future =  _appProvider.fetchData(widget.codigoSba);
-       _appProvider.fetchDataUbi(widget.codigoSba);
-    
+      _future = _appProvider.fetchData(widget.codigoSba);
+      _appProvider.fetchDataUbi(widget.codigoSba);
+
+      final size = MediaQuery.of(context).size;
       setState(() {
-        _arriba = anchoPantalla - 80;
-        _izquierdo = alturaPantalla - 1100;
+        _arriba = size.width - 80;
+        _izquierdo = size.height - 1100;
       });
     });
   }
 
   Future<void> _actualizarPantalla() async {
-    // Aquí deberías realizar la lógica para actualizar los datos
     await Future.delayed(const Duration(milliseconds: 200));
   }
 
@@ -86,16 +80,14 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            VistaFiltro(
-              barcode: widget.barcode,
-              codSba: codigoSba3,
-              jsonData: widget.jsonData,
-              jsonDataUbi: widget.jsonDataUbi,
-            ),
+        pageBuilder: (context, animation, secondaryAnimation) => VistaFiltro(
+          barcode: widget.barcode,
+          codSba: codigoSba3,
+          jsonData: widget.jsonData,
+          jsonDataUbi: widget.jsonDataUbi,
+        ),
         transitionDuration: const Duration(milliseconds: 500),
-        transitionsBuilder:
-            (context, animation, secondaryAnimation, child) {
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
             position: Tween<Offset>(
               end: Offset.zero,
@@ -110,8 +102,11 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
 
   @override
   Widget build(BuildContext context) {
-    double totalCantidadUbicaciones = 0.0;
+    final size = MediaQuery.of(context).size;
+    //final double fontSizeTitle = size.width > 600 ? 28 : 24; // Título
+    final double fontSizeData = size.width > 600 ? 20 : 16; // Datos
 
+    double totalCantidadUbicaciones = 0.0;
     for (var data in _appProvider.jsonDataUbi) {
       if (data['Cantidad'] != null && data['Cantidad'] is num) {
         totalCantidadUbicaciones += data['Cantidad'];
@@ -139,48 +134,69 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
       totalCantidadAlmacen += stockValue;
     });
 
-    // ignore: unused_local_variable
     double diferencia = totalCantidadAlmacen - totalCantidadUbicaciones;
-    
+
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
+        title: Text(
+          ' DETALLE ITEM : ${_appProvider.jsonData.first['ItemCode'] ?? 'N/A'}',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
       ),
       body: Stack(
         children: [
           RefreshIndicator(
             onRefresh: _refrescarPantalla,
             child: FutureBuilder(
-                future: _future,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const LoadingIndicator();
-                  } else if (snapshot.hasError) {
-                    return Center(
-                        child: Text("Error: ${snapshot.error.toString()}"));
-                  } else {
-                    return Center(
-                      child: SizedBox(
-                        width: 700,
-                        child: ListView(
-                          padding: const EdgeInsets.all(16),
-                          children: [
-                            TablaAlmacen(
-                              jsonData: _appProvider.jsonData,
-                              resultados: const [],
-                              jsonDataUbi: _appProvider.jsonDataUbi,
-                            ),
-                            TablaUbicacion(
-                              jsonData: _appProvider.jsonData,
-                              jsonDataUbi: _appProvider.jsonDataUbi,
-                            ),
-                           
-                          ],
-                        ),
+              future: _future,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const LoadingIndicator();
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      "Error: ${snapshot.error.toString()}",
+                      style: TextStyle(fontSize: fontSizeData),
+                    ),
+                  );
+                } else {
+                  return Center(
+                    child: SizedBox(
+                      width: size.width > 800 ? 700 : size.width * 0.9,
+                      child: ListView(
+                        children: [
+                          TablaAlmacen(
+                            jsonData: _appProvider.jsonData,
+                            resultados: const [],
+                            jsonDataUbi: _appProvider.jsonDataUbi,
+                            codigoSba: widget.codigoSba,
+                            barcode: widget.barcode, onItemPressed: () { 
+                              setState(() {
+                                indice = 0;
+                              });
+                             },
+                          ),
+                          TablaUbicacion(
+                            jsonData: _appProvider.jsonData,
+                            jsonDataUbi: _appProvider.jsonDataUbi, onItemPressed2: () { 
+                              setState(() {
+                                indice = 1;
+                              });
+                             },
+                            
+                          ),
+                        ],
                       ),
-                    );
-                  }
-                }),
+                    ),
+                  );
+                }
+              },
+            ),
           ),
           Positioned(
             left: _arriba,
@@ -195,11 +211,11 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
 
                   if (nuevoArriba < 0) nuevoArriba = 0;
                   if (nuevaDerecha < 0) nuevaDerecha = 0;
-                  if (nuevoArriba > MediaQuery.of(context).size.width - 56) {
-                    nuevoArriba = MediaQuery.of(context).size.width - 56;
+                  if (nuevoArriba > size.width - 56) {
+                    nuevoArriba = size.width - 56;
                   }
-                  if (nuevaDerecha > MediaQuery.of(context).size.height - 56) {
-                    nuevaDerecha = MediaQuery.of(context).size.height - 56;
+                  if (nuevaDerecha > size.height - 56) {
+                    nuevaDerecha = size.height - 56;
                   }
 
                   _arriba = nuevoArriba;
@@ -211,8 +227,16 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
           )
         ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.amberAccent[400],
+        onPressed: _navegarSiguientePag,
+        child: const Icon(
+          color: Colors.white70,
+          Icons.playlist_add_outlined),
+      ),
       bottomNavigationBar: Container(
-        height: 110,
+        //height: size.height > 600 ? 110 : 80,
         padding: const EdgeInsets.only(bottom: 2),
         child: BottomNavigationBar(
           elevation: 10,
@@ -223,10 +247,10 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
           items: [
             BottomNavigationBarItem(
               icon: Container(
-                width: 150,
+                width: size.width > 600 ? 150 : 120,
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.2),
+                  color: indice == 0 ? Colors.greenAccent[400] : const Color.fromARGB(255, 241, 237, 237),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Column(
@@ -234,20 +258,20 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
                   children: [
                     Icon(
                       Icons.home,
-                      size: 24,
+                      size: size.width > 600 ? 30 : 24,
                       color: indice == 0 ? Colors.blue : Colors.black,
                     ),
                     Text(
-                      'Stock Fisico',
+                      'Stock Sistema',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: size.width > 600 ? 14 : 12,
                         color: indice == 0 ? Colors.blue : Colors.black,
                       ),
                     ),
                     Text(
-                      '$diferencia',
+                      '$totalCantidadAlmacen',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: size.width > 600 ? 14 : 12,
                         color: indice == 0 ? Colors.blue : Colors.black,
                       ),
                     ),
@@ -258,10 +282,10 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
             ),
             BottomNavigationBarItem(
               icon: Container(
-                width: 150,
+                width: size.width > 600 ? 150 : 120,
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.2),
+                  color: indice == 1 ? Colors.blueAccent[400] : const Color.fromARGB(255, 241, 237, 237),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Column(
@@ -269,21 +293,23 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
                   children: [
                     Icon(
                       Icons.warehouse,
-                      size: 24,
-                      color: indice == 1 ? const Color.fromARGB(255, 16, 187, 21) : Colors.black,
+                      size: size.width > 600 ? 30 : 24,
+                      color: indice == 1 ? Color.fromARGB(255, 255, 255, 255) : Colors.black,
                     ),
                     Text(
-                      'Stock Sistema',
+                      'Stock Fisico',
                       style: TextStyle(
-                        fontSize: 12,
-                        color: indice == 1 ? const Color.fromARGB(255, 16, 187, 21) : Colors.black,
+                        fontSize: size.width > 600 ? 14 : 12,
+                        color: indice == 1 ?  const Color.fromARGB(255, 255, 255, 255)
+                            : Colors.black,
                       ),
                     ),
                     Text(
-                      '$totalCantidadAlmacen',
+                      '$totalCantidadUbicaciones',
                       style: TextStyle(
-                        fontSize: 12,
-                        color: indice == 1 ? const Color.fromARGB(255, 16, 187, 21) : Colors.black,
+                        fontSize: size.width > 600 ? 14 : 12,
+                        color: indice == 1 ? const Color.fromARGB(255, 255, 255, 255)
+                            : Colors.black,
                       ),
                     ),
                   ],
@@ -293,32 +319,36 @@ class _NuevaVistaDetalleState extends State<NuevaVistaDetalle> {
             ),
             BottomNavigationBarItem(
               icon: Container(
-                width: 150,
+                width: size.width > 600 ? 150 : 120,
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.2),
+                  color: Colors.redAccent[400],
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.calculate,
-                      size: 24,
-                      color: indice == 2 ? Colors.red : Colors.black,
+                      Icons.remove_rounded,
+                      size: size.width > 600 ? 30 : 24,
+                      color: indice == 2 ? Color.fromARGB(255, 255, 255, 255) : Colors.black,
                     ),
                     Text(
                       'Diferencia',
                       style: TextStyle(
-                        fontSize: 12,
-                        color: indice == 2 ? Colors.red : Colors.black,
+                        fontSize: size.width > 600 ? 14 : 12,
+                        color: indice == 2
+                            ? const Color.fromARGB(255, 255, 255, 255)
+                            : Colors.black,
                       ),
                     ),
                     Text(
-                      '$totalCantidadUbicaciones',
+                      '$diferencia',
                       style: TextStyle(
-                        fontSize: 12,
-                        color: indice == 2 ? Colors.red : Colors.black,
+                        fontSize: size.width > 600 ? 14 : 12,
+                        color: indice == 2
+                            ? const Color.fromARGB(255, 255, 255, 255)
+                            : Colors.black,
                       ),
                     ),
                   ],

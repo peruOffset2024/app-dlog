@@ -1,19 +1,18 @@
-import 'package:app_dlog/index/providers/appprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:app_dlog/index/providers/appprovider.dart';
 
 class TablaAlmacen extends StatefulWidget {
   final List<dynamic> jsonData;
-  //final void Function(double) onTotalCantidadCalculated; // Callback
+  final String codigoSba;
+  final String barcode;
+  final VoidCallback onItemPressed;
 
-  // ignore: use_key_in_widget_constructors
   const TablaAlmacen({
     super.key,
     required this.jsonData,
     required List resultados,
-    required List jsonDataUbi,
-    //required this.onTotalCantidadCalculated, // Callback
+    required List jsonDataUbi, required this.codigoSba, required this.barcode, required this.onItemPressed,
   });
 
   @override
@@ -24,6 +23,12 @@ class _TablaAlmacenState extends State<TablaAlmacen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final double containerWidth = size.width * 0.9; // Ancho de los contenedores ajustado al 90% del ancho de la pantalla
+    final double fontSizeTitle = size.width > 600 ? 20 : 18; // Tamaño de fuente para el título
+    final double fontSizeContent = size.width > 600 ? 16 : 14; // Tamaño de fuente para el contenido
+    final double columnSpacing = size.width > 600 ? 150.0 : 100.0; // Espaciado entre columnas
+
     // Lista de almacenes que deben considerarse para la suma
     const almacenesConsiderados = [
       'ALMACEN DE RESERVA',
@@ -49,175 +54,170 @@ class _TablaAlmacenState extends State<TablaAlmacen> {
       totalCantidad += stockValue;
     });
     final appProvider = Provider.of<AppProvider>(context);
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (appProvider.jsonData.isNotEmpty) ...[
-            Container(
-              width: 700,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    ' DETALLE ITEM : ${widget.jsonData.first['ItemCode'] ?? 'N/A'}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+
+    return GestureDetector(
+      onTap: widget.onItemPressed,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Padding(
+          padding: EdgeInsets.all(size.width > 600 ? 20.0 : 10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (appProvider.jsonData.isNotEmpty) ...[
+                Container(
+                  width: containerWidth,
+                  padding: EdgeInsets.all(size.width > 600 ? 20.0 : 10.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    appProvider.jsonData.first['itemdescripcion'] ??
-                        'Descripción no disponible',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-          if (appProvider.jsonData.isNotEmpty) ...[
-              // ignore: sized_box_for_whitespace
-              Container(
-                width: 600,
-                height: 60,
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      'STOCK SISTEMA ',
-                      style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(width: 100,),
-          
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10,)
-            ],
-          appProvider.jsonData.isNotEmpty
-              // ignore: sized_box_for_whitespace
-              ? Container(
-                  width: 700,
-                  child: Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: DataTable(
-                        headingRowColor: WidgetStateColor.resolveWith(
-                          (states) => Colors.grey[300]!,
-                        ),
-                        columns: const [
-                          DataColumn(
-                            label: Text(
-                              'ALMACÉN',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 10),
+                      Center(
+                        child: Text(
+                          appProvider.jsonData.first['itemdescripcion'] ??
+                              'Descripción no disponible',
+                          style: TextStyle(
+                            fontSize: fontSizeTitle,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.bold
                           ),
-                          DataColumn(
-                            label: Text(
-                              'STOCK',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        ],
-                        rows: [
-                          //////
-                          ...appProvider.jsonData
-                              .where((data) =>
-                                  !['ALMACEN DE FALTANTES', 'ALMACEN PROVEEDOR'].contains(data['Name']))
-                              .map<DataRow>((data) {
-                            return DataRow(
-                              cells: [
-                                DataCell(Container(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Text(
-                                    data['Name'] ?? 'Sin almacén',
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                )),
-                                DataCell(Container(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Text(
-                                    data['Stock']?.toString() ?? 'Sin stock',
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                )),
-                              ],
-                            );
-                          // ignore: unnecessary_to_list_in_spreads
-                          }).toList(),
-                          if (appProvider.jsonData.any((data) =>
-                              almacenesConsiderados.contains(data['Name'])))
-                            DataRow(
-                              cells: [
-                                DataCell(Container(
-                                  padding: const EdgeInsets.all(8),
-                                  child: const Text(
-                                    'TOTAL',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                )),
-                                DataCell(Container(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Text(
-                                    totalCantidad.toString(),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                )),
-                              ],
-                            ),
-                        ],
-                        columnSpacing: 190.0,
-                        horizontalMargin: 20.0,
-                        headingTextStyle: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                        ),
-                        dataTextStyle: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                        ),
-                        decoration: BoxDecoration(
-                          border:
-                              Border.all(color: Colors.grey[400]!, width: 1),
-                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                )
-              : const Center(child: Text('')), //texto Codigo SBA no existe
-        ],
+                ),
+                const SizedBox(height: 20),
+              ],
+              if (appProvider.jsonData.isNotEmpty) ...[
+                Container(
+                  width: containerWidth,
+                  height: 60,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'STOCK SISTEMA ',
+                        style: TextStyle(fontSize: fontSizeTitle, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(width: size.width > 600 ? 150 : 100),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
+              appProvider.jsonData.isNotEmpty
+                  ? Container(
+                      width: containerWidth,
+                      child: Card(
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: DataTable(
+                            headingRowColor: MaterialStateColor.resolveWith(
+                              (states) => Colors.grey[300]!,
+                            ),
+                            columns: [
+                              DataColumn(
+                                label: Text(
+                                  'ALMACÉN',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: fontSizeContent,
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'STOCK',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: fontSizeContent,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            rows: [
+                              ...appProvider.jsonData
+                                  .where((data) =>
+                                      !['ALMACEN DE FALTANTES', 'ALMACEN PROVEEDOR'].contains(data['Name']))
+                                  .map<DataRow>((data) {
+                                return DataRow(
+                                  cells: [
+                                    DataCell(Container(
+                                      padding: EdgeInsets.all(size.width > 600 ? 16.0 : 8.0),
+                                      child: Text(
+                                        data['Name'] ?? 'Sin almacén',
+                                        style: TextStyle(fontSize: fontSizeContent),
+                                      ),
+                                    )),
+                                    DataCell(Container(
+                                      padding: EdgeInsets.all(size.width > 600 ? 16.0 : 8.0),
+                                      child: Text(
+                                        data['Stock']?.toString() ?? 'Sin stock',
+                                        style: TextStyle(fontSize: fontSizeContent),
+                                      ),
+                                    )),
+                                  ],
+                                );
+                              }).toList(),
+                              if (appProvider.jsonData.any((data) =>
+                                  almacenesConsiderados.contains(data['Name'])))
+                                DataRow(
+                                  cells: [
+                                    DataCell(Container(
+                                      padding: EdgeInsets.all(size.width > 600 ? 16.0 : 8.0),
+                                      child:  Text(
+                                        'TOTAL',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: fontSizeContent,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                    )),
+                                    DataCell(Container(
+                                      padding: EdgeInsets.all(size.width > 600 ? 16.0 : 8.0),
+                                      child: Text(
+                                        totalCantidad.toString(),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: fontSizeContent,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                    )),
+                                  ],
+                                ),
+                            ],
+                            columnSpacing: columnSpacing,
+                            horizontalMargin: size.width > 600 ? 20.0 : 10.0,
+                            headingTextStyle: TextStyle(
+                              color: Colors.black,
+                              fontSize: fontSizeContent,
+                            ),
+                            dataTextStyle: TextStyle(
+                              color: Colors.black,
+                              fontSize: fontSizeContent,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey[400]!, width: 1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const Center(child: Text('')),
+            ],
+          ),
+        ),
       ),
     );
   }

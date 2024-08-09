@@ -8,131 +8,110 @@ class Pag1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final double fontSizeTitle = size.width > 600 ? 25 : 20; // Tamaño de fuente del título
+    final double fontSizeData = size.width > 600 ? 18 : 16; // Tamaño de fuente de los datos
+    final double fontSizeSubTitle = size.width > 600 ? 16 : 14; // Tamaño de fuente para subtítulos
+
     return ChangeNotifierProvider(
       create: (_) => DataProvider()..fetchData(),
       child: Consumer<DataProvider>(
         builder: (context, dataProvider, child) {
           return Scaffold(
-            
+            appBar: AppBar(
+              leading: const Text(''),
+              title: Text(
+                'Diferencias de Items',
+                style: TextStyle(fontSize: fontSizeTitle),
+              ),
+              centerTitle: true,
+            ),
             body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Diferencias de Items', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 50,),
-                  Container(
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color.fromARGB(255, 200, 220, 230), // Color inicial más suave
-                          Color.fromARGB(255, 255, 255, 255), // Color final blanco
-                        ],
-                      ),
-                    ),
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        await dataProvider.fetchData();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Datos actualizados')),
-                        );
-                      },
-                      child: dataProvider.isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : dataProvider.errorMessage.isNotEmpty
-                              ? Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Text(
-                                      dataProvider.errorMessage,
-                                      style: const TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 16,
-                                      ),
-                                    ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    await dataProvider.fetchData();
+                    // ignore: use_build_context_synchronously
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Datos actualizados')),
+                    );
+                  },
+                  child: dataProvider.isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : dataProvider.errorMessage.isNotEmpty
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(
+                                  dataProvider.errorMessage,
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: fontSizeData,
                                   ),
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: DataTable(
-                                      columnSpacing: 20,
-                                      columns: const [
-                                        DataColumn(
-                                          label: Text(
-                                            'SBA',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: dataProvider.data.length,
+                              itemBuilder: (context, index) {
+                                final item = dataProvider.data[index];
+                                return Card(
+                                  margin: const EdgeInsets.symmetric(vertical: 8.0),
+                                  elevation: 4,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.all(16.0),
+                                    title: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text( 
+                                          'SBA: ${item['ItemCode'] ?? ''}',
+                                          style: TextStyle(
+                                            fontSize: fontSizeData,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        DataColumn(
-                                          label: Text(
-                                            'Descripción',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ),
-                                        DataColumn(
-                                          label: Text(
-                                            'Diferencia',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ),
-                                        DataColumn(
-                                          label: Text(
-                                            '     -',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
+                                        const SizedBox(height: 4.0),
+                                        Text(
+                                          item['Descripcion'] ?? '',
+                                          style: TextStyle(
+                                            fontSize: fontSizeSubTitle,
+                                            color: Colors.grey[700],
                                           ),
                                         ),
                                       ],
-                                      rows: dataProvider.data.map((item) {
-                                        return DataRow(
-                                          cells: [
-                                            DataCell(
-                                              Text(
-                                                item['ItemCode'] ?? '',
-                                                style: const TextStyle(fontSize: 14),
-                                              ),
+                                    ),
+                                    subtitle: Text(
+                                      'Diferencia: ${item['diferencia'] ?? ''}',
+                                      style: TextStyle(
+                                        fontSize: fontSizeData,
+                                        color: Colors.redAccent[400]
+                                      ),
+                                    ),
+                                    trailing: IconButton(
+                                      icon: const Icon(Icons.remove_red_eye_sharp),
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => NuevaVistaDetalle(
+                                              jsonData: const [],
+                                              jsonDataUbi: const [],
+                                              codigoSba: item['ItemCode'],
+                                              barcode: '',
                                             ),
-                                            DataCell(
-                                              Text(
-                                                item['Descripcion'] ?? '',
-                                                style: const TextStyle(fontSize: 14),
-                                              ),
-                                            ),
-                                            DataCell(
-                                              Text(
-                                                item['diferencia'] ?? '',
-                                                style: const TextStyle(fontSize: 14),
-                                              ),
-                                            ),
-                                            DataCell(
-                                              IconButton(
-                                                focusColor: Colors.black,
-                                                onPressed: () {  }, icon: const Icon(Icons.remove_red_eye_sharp),)
-                                            )
-                                          ],
+                                          ),
                                         );
-                                      }).toList(),
+                                      },
                                     ),
                                   ),
-                                ),
-                    ),
-                  ),
-                ],
+                                );
+                              },
+                            ),
+                ),
               ),
             ),
           );
@@ -140,19 +119,4 @@ class Pag1 extends StatelessWidget {
       ),
     );
   }
-  void _navigateToDetailPage(BuildContext context, Map<String, dynamic> item) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => NuevaVistaDetalle(jsonData: [], jsonDataUbi: [], codigoSba: item['ItemCode'], barcode: '',
-          
-        ),
-      ),
-    );
-  }
-
-  
-
 }
- 
-

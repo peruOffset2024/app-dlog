@@ -44,6 +44,8 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  
+
   void updateJsonData(List<dynamic> newJsonData) {
     _jsonData = newJsonData;
     notifyListeners();

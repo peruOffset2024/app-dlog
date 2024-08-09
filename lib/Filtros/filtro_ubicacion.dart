@@ -30,19 +30,20 @@ class _VistaFiltroState extends State<VistaFiltro> {
   final List<String> _stand = ['1', '2', '3', '4', '5', '6'];
   final List<String> _fila = ['1', '2', '3', '4', '5', '6'];
   final List<String> _columna = ['1', '2', '3', '4', '5', '6'];
-  
-   
+  final List<String> _ubicacion = ['1', '2', '3', '4', '5', '6'];
+
   String? _selectedZona;
   String? _selectedStand;
   String? _selectedFila;
   String? _selectedColumna;
+  String? _selectedUbicacion;
+
   // ignore: prefer_final_fields
   List<File> _images = [];
   final TextEditingController _cantidadController = TextEditingController();
   final TextEditingController _usuarioController = TextEditingController();
   List<dynamic> jsonDataUbi = [];
   ValueNotifier<List<dynamic>> notifier = ValueNotifier([]);
-
 
   late AppProvider _appProvider;
 
@@ -51,7 +52,6 @@ class _VistaFiltroState extends State<VistaFiltro> {
     super.didChangeDependencies();
     _appProvider = Provider.of<AppProvider>(context, listen: false);
   }
-  
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
@@ -62,6 +62,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
     }
   }
 
+  // aqui empezamos a modificar
   Future<void> _pickMultipleImages() async {
     final pickedFiles = await ImagePicker().pickMultiImage();
     // ignore: unnecessary_null_comparison
@@ -105,7 +106,9 @@ class _VistaFiltroState extends State<VistaFiltro> {
   }
 
   Future<void> enviarData() async {
-    if (_selectedZona == null ||
+    if (
+        _selectedUbicacion == null ||
+        _selectedZona == null ||
         _selectedStand == null ||
         _selectedFila == null ||
         _selectedColumna == null ||
@@ -144,7 +147,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
 
       var request = http.MultipartRequest('POST', Uri.parse(uploadUrl))
         ..fields['search'] = codigoSba
-        ..fields['ubicacion'] = '1'
+        ..fields['ubicacion'] = _selectedUbicacion!
         ..fields['zona'] = _selectedZona!
         ..fields['stand'] = _selectedStand!
         ..fields['col'] = _selectedColumna!
@@ -189,6 +192,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
     _cantidadController.clear();
     _usuarioController.clear();
     setState(() {
+      _selectedUbicacion = null;
       _selectedZona = null;
       _selectedStand = null;
       _selectedFila = null;
@@ -215,7 +219,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
               child: const Text('OK'),
               onPressed: () {
                 Navigator.pop(context); // Cierra el diálogo
-               /* Navigator.pushReplacement(
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (context) => NuevaVistaDetalle(
@@ -226,8 +230,8 @@ class _VistaFiltroState extends State<VistaFiltro> {
                     ),
                     maintainState: false, // Agrega esta propiedad
                   ),
-                );*/
-                 Navigator.pushReplacement(
+                );
+                /* Navigator.pushReplacement(
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
@@ -249,7 +253,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                       );
                     },
                   ),
-                );
+                );*/
               },
             ),
           ],
@@ -280,9 +284,17 @@ class _VistaFiltroState extends State<VistaFiltro> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text(
+          ' DETALLE ITEM : ${_appProvider.jsonData.first['ItemCode'] ?? 'N/A'}',
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -292,14 +304,6 @@ class _VistaFiltroState extends State<VistaFiltro> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    ' DETALLE ITEM : ${_appProvider.jsonData.first['ItemCode'] ?? 'N/A'}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  Text(
                     _appProvider.jsonData.first['itemdescripcion'] ??
                         'Descripción no disponible',
                     style: const TextStyle(
@@ -308,6 +312,13 @@ class _VistaFiltroState extends State<VistaFiltro> {
                         fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
+                  _buildDropdownField('UBICACION', _ubicacion, _selectedZona,
+                      (String? newValue) {
+                    setState(() {
+                      _selectedZona = newValue;
+                    });
+                  }),
+                  const SizedBox(height: 20),
                   _buildDropdownField('ZONA', _zona, _selectedZona,
                       (String? newValue) {
                     setState(() {
@@ -315,7 +326,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                     });
                   }),
                   const SizedBox(height: 20),
-                  _buildDropdownField('Stand', _stand, _selectedStand,
+                  _buildDropdownField('STAND', _stand, _selectedStand,
                       (String? newValue) {
                     setState(() {
                       _selectedStand = newValue;
@@ -326,7 +337,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: _buildDropdownField('Fila', _fila, _selectedFila,
+                        child: _buildDropdownField('FILA', _fila, _selectedFila,
                             (String? newValue) {
                           setState(() {
                             _selectedFila = newValue;
@@ -336,7 +347,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: _buildDropdownField(
-                            'Columna', _columna, _selectedColumna,
+                            'COLUMNA', _columna, _selectedColumna,
                             (String? newValue) {
                           setState(() {
                             _selectedColumna = newValue;
@@ -350,7 +361,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                     controller: _cantidadController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
-                      labelText: 'Cantidad',
+                      labelText: 'CANTIDAD',
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.numbers),
                     ),
@@ -359,7 +370,7 @@ class _VistaFiltroState extends State<VistaFiltro> {
                   TextField(
                     controller: _usuarioController,
                     decoration: const InputDecoration(
-                      labelText: 'Usuario',
+                      labelText: 'USUARIO',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -444,14 +455,14 @@ class _VistaFiltroState extends State<VistaFiltro> {
         onPressed: () {
           enviarData();
         },
-        color: const Color.fromARGB(255, 49, 55, 59),
+        color: const Color.fromARGB(255, 126, 185, 224),
         child: Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: 338,
-            vertical: 30,
+            horizontal: 50,
+            vertical: 10,
           ),
           child: const Text(
-            'Ingresar',
+            'Agregar Ubicacion',
             style: TextStyle(fontSize: 20, color: Colors.white),
           ),
         ),
@@ -469,7 +480,8 @@ class _VistaFiltroState extends State<VistaFiltro> {
           value: item,
           child: Text(
             item,
-            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                color: Colors.black, fontWeight: FontWeight.bold),
           ),
         );
       }).toList(),

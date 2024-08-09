@@ -8,6 +8,7 @@ import 'package:provider/provider.dart'; // Asegúrate de importar tu pantalla d
 
 class NavigatorBotonIndex extends StatefulWidget {
   const NavigatorBotonIndex({super.key});
+  
 
   @override
   State<NavigatorBotonIndex> createState() => _NavigatorBotonIndexState();
@@ -49,6 +50,7 @@ class _NavigatorBotonIndexState extends State<NavigatorBotonIndex> {
   );
 
   if (salir == true) {
+    // ignore: use_build_context_synchronously
     Provider.of<AuthProvider>(context, listen: false).logout();
     Navigator.pushAndRemoveUntil(
       // ignore: use_build_context_synchronously

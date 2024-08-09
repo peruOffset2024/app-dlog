@@ -3,7 +3,7 @@ import 'package:app_dlog/index/providers/auth_provider.dart';
 import 'package:app_dlog/login/Clases_por_consumir/input_decorations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// Ajusta la ruta a tu archivo AuthProvider
+
 
 class IniciarSesion extends StatefulWidget {
   const IniciarSesion({super.key});
@@ -17,6 +17,13 @@ class _IniciarSesionState extends State<IniciarSesion> {
 
   final TextEditingController _numeroController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _obscureText = true;
+
+  void _toggleVisibility() {
+    setState(() {
+      _obscureText = !_obscureText;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +33,12 @@ class _IniciarSesionState extends State<IniciarSesion> {
         onTap: () {
           FocusScope.of(context).requestFocus(FocusNode());
         },
-        child: SizedBox(
+        child: Container(
           width: double.infinity,
           height: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.amber
+          ),
           child: Stack(
             children: [
               cajapurpura(size),
@@ -43,127 +53,138 @@ class _IniciarSesionState extends State<IniciarSesion> {
 
   Widget loginform(BuildContext context, Size size) {
     return Center(
-      child: Container(
-        padding: EdgeInsets.all(size.width * 0.05),
-        margin: EdgeInsets.symmetric(horizontal: size.width * 0.08),
-        width: size.width * 0.9,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 15,
-              offset: Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 30),
-            const Text(
-              'DLOG',
-              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
-            ),
-            Form(
-              key: _formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              child: Column(
-                children: [
-                  const SizedBox(height: 30),
-                  TextFormField(
-                    controller: _numeroController,
-                    autocorrect: false,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecorations.inputDecoration(
-                      hintText: 'Ingrese su número',
-                      labelText: 'Número de usuario',
-                      icono: const Icon(Icons.person),
+      child: SingleChildScrollView(
+        child: Container(
+          
+          padding: EdgeInsets.all(size.width * 0.05),
+          margin: EdgeInsets.symmetric(horizontal: size.width * 0.08),
+          width: size.width * 0.9,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 15,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 30),
+              const Text(
+                'DLOG',
+                style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+              ),
+              Form(
+                key: _formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: Column(
+                  children: [
+                    const SizedBox(height: 30),
+                    TextFormField(
+                      controller: _numeroController,
+                      autocorrect: false,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecorations.inputDecoration(
+                        hintText: 'Ingrese su número',
+                        labelText: 'Número de usuario',
+                        icono: const Icon(Icons.person),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 30),
-                  TextFormField(
-                    controller: _passwordController,
-                    autocorrect: false,
-                    obscureText: true,
-                    decoration: InputDecorations.inputDecoration(
-                      hintText: '*********',
-                      labelText: 'Contraseña',
-                      icono: const Icon(Icons.lock_outlined),
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  Consumer<AuthProvider>(
-                    builder: (context, authProvider, child) {
-                      return MaterialButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                    const SizedBox(height: 30),
+                    TextFormField(
+                      controller: _passwordController,
+                      autocorrect: false,
+                      obscureText: _obscureText,
+                      decoration: InputDecoration(
+                        hintText: '*********',
+                        labelText: 'Contraseña',
+                        icon: const Icon(Icons.lock_outlined),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureText
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: _toggleVisibility,
                         ),
-                        disabledColor: Colors.grey,
-                        onPressed: authProvider.isAuthenticated
-                            ? () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const NavigatorBotonIndex(),
-                                  ),
-                                );
-                              }
-                            : () async {
-                                if (_formKey.currentState?.validate() ??
-                                    false) {
-                                  try {
-                                    await authProvider.login(
-                                      _numeroController.text,
-                                      _passwordController.text,
-                                    );
-                                    if (authProvider.isAuthenticated) {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const NavigatorBotonIndex(),
-                                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, child) {
+                        return MaterialButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          disabledColor: Colors.grey,
+                          onPressed: authProvider.isAuthenticated
+                              ? () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const NavigatorBotonIndex(),
+                                    ),
+                                  );
+                                }
+                              : () async {
+                                  if (_formKey.currentState?.validate() ??
+                                      false) {
+                                    try {
+                                      await authProvider.login(
+                                        _numeroController.text,
+                                        _passwordController.text,
                                       );
-                                    } else {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
+                                      if (authProvider.isAuthenticated) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const NavigatorBotonIndex(),
+                                          ),
+                                        );
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content:
+                                                  Text('Invalid credentials')),
+                                        );
+                                      }
+                                    } catch (error) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                             content:
-                                                Text('Invalid credentials')),
+                                                Text('Authentication failed')),
                                       );
                                     }
-                                  } catch (error) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content:
-                                              Text('Authentication failed')),
-                                    );
                                   }
-                                }
-                              },
-                        color: Colors.deepPurple,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: size.width * 0.2,
-                            vertical: size.height * 0.02,
+                                },
+                          color: const Color.fromARGB(255, 43, 43, 44),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: size.width * 0.2,
+                              vertical: size.height * 0.02,
+                            ),
+                            child: const Text(
+                              'Ingresar',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
-                          child: const Text(
-                            'Ingresar',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 30),
-          ],
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );
@@ -189,8 +210,8 @@ class _IniciarSesionState extends State<IniciarSesion> {
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color.fromRGBO(24, 128, 197, 1),
-            Color.fromRGBO(90, 70, 178, 1),
+            Color.fromRGBO(224, 116, 53, 1),
+            Color.fromRGBO(199, 104, 15, 1),
           ],
         ),
       ),
